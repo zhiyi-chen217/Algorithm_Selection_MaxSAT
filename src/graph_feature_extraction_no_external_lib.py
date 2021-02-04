@@ -49,21 +49,20 @@ def addVCGEdge(V_nodes, C_node, clause, count_C):
 
 common = ['mean', 'max', 'min', 'std']
 VG = list(map(lambda s: 'VG-' + s, common))
-# VCG = list(map(lambda s: 'VCG-' + s, common))
-all_feature = ['instance'] + VG
+VCG = list(map(lambda s: 'VCG-' + s, common))
+all_feature = ['instance'] + VG + VCG
 
-#d = pandas.DataFrame(data=[], columns=all_feature)
+d = pandas.DataFrame(data=[], columns=all_feature)
 
 
 os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_instances/ms_evals/MS19/mse19-incomplete-unweighted"
-         "-benchmarks/extra_large")
+         "-benchmarks")
 for root, dirs, files in os.walk("."):
     for file in files:
         if file.endswith(".gz"):
-            d = pandas.DataFrame(data=[], columns = ['variable', 'n_edge'])
             VG_nodes = []
-            # V_nodes = []
-            # C_nodes = []
+            V_nodes = []
+            C_nodes = []
             fname = os.path.join(root, file)
             print(fname)
             f = gzip.open(fname, 'rt')
@@ -78,21 +77,19 @@ for root, dirs, files in os.walk("."):
             
             for n in range(limit):
                 VG_nodes.append(Node())
-                # V_nodes.append(Node())
-            # for n in range(nc):
-            #     C_nodes.append(Node())
+                V_nodes.append(Node())
+            for n in range(nc):
+                C_nodes.append(Node())
 
             for i in range(nc):
                 s = f.readline()
                 clause = s.split(" ")
                 clause = clause[1:len(clause) - 1]
                 addVGEdge(VG_nodes, clause)
-                # addVCGEdge(V_nodes, C_nodes[i], clause, i + 1)
+                addVCGEdge(V_nodes, C_nodes[i], clause, i + 1)
             all_dict = calculateFeature(VG_nodes, "VG")
-            # all_dict.update(calculateFeature(V_nodes + C_nodes, "VCG"))
-            # all_dict["instance"] = fname[2:]
-            for i in range(limit):
-                all_dict = {'variable': i + 1, 'n_edge': len(VG_nodes[i].edges)}
-                d = d.append(all_dict, ignore_index=True)
-            d = d.set_index('variable')
-            d.to_csv(fname[2:] + "_feature_graph_V_1.csv")
+            all_dict.update(calculateFeature(V_nodes + C_nodes, "VCG"))
+            all_dict["instance"] = fname[2:]
+            d = d.append(all_dict, ignore_index=True)
+d = d.set_index('instance')
+d.to_csv("feature_graph.csv")

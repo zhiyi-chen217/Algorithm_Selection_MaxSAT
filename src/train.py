@@ -15,6 +15,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import GridSearchCV
 import os
 
 os.chdir("../data")
@@ -26,6 +28,14 @@ n_instance = 299
 parameter_space = {
     'RandomForestRegressor' : {
         'n_estimators' : [i for i in range(10, 30, 2)],
+        'min_samples_leaf' : [i for i in range(1, 10, 2)],
+        'min_samples_split' : [i for i in range(2, 20, 2)]
+        }
+    }
+
+parameter_space_grid = {
+    'RandomForestRegressor' : {
+        'n_estimators' : [i for i in range(10, 60, 2)],
         'min_samples_leaf' : [i for i in range(1, 10, 2)],
         'min_samples_split' : [i for i in range(2, 20, 2)]
         }
@@ -108,6 +118,7 @@ feature = feature.loc[:,  column_selection]
 all_scores = readCSV("result_unweighted.csv")
 best_solver = readCSV("per_instance_best_solver_unweighted.csv")
 best_score = readCSV("per_instance_best_score_unweighted.csv")
+problem_label = readCSV("problem_label.csv")
 
 rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=0)
 
@@ -124,6 +135,10 @@ inputInstance = feature.iloc[train_ind, 1:]
 scaler = StandardScaler()
 inputInstance = scaler.fit_transform(inputInstance)
 all_scaler = scaler
+
+problem_train_label = list(problem_label.iloc[train_ind, 1])
+skf = StratifiedKFold(n_splits=3)
+
 for s in solvers:
     target = all_scores.loc[train_ind, s]
     
@@ -132,9 +147,10 @@ for s in solvers:
     # all_pca[s] = pca
     
     reg = RandomForestRegressor()
-    reg.fit(inputInstance, target)
-    
-    all_reg[s] = reg
+    clf = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
+    clf.fit(inputInstance, target)
+    print(clf.best_params_)
+    all_reg[s] = clf
 
 
 test_instance = feature.iloc[test_ind, 1:]
