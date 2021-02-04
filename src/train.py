@@ -15,9 +15,12 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
+import os
 
-feature_file_name = "feature_more_balance_feature_unweighted.csv"
-unique_value_limit = 20
+os.chdir("../data")
+
+feature_file_name = "feature_balance_graph_horn_feature_unweighted.csv"
+unique_value_limit = 50
 n_instance = 299
 
 parameter_space = {
@@ -78,13 +81,29 @@ def expandFeature(feature) :
     return feature
 
     
-
+instance_features = ['instance', 'ncls', 'nhard_len_stats.ave',
+       'nhard_len_stats.max', 'nhard_len_stats.min', 'nhard_len_stats.stddev',
+       'nhards', 'nsoft_len_stats.ave', 'nsoft_len_stats.max',
+       'nsoft_len_stats.min', 'nsoft_len_stats.stddev', 'nsoft_wts', 'nsofts',
+       'nvars', 'soft_wt_stats.ave', 'soft_wt_stats.max', 'soft_wt_stats.min',
+       'soft_wt_stats.stddev']
+balance_features = ['balance-hard', 'balance-hard-max', 'balance-hard-mean',
+       'balance-hard-min', 'balance-hard-std', 'balance-soft',
+       'balance-soft-max', 'balance-soft-mean', 'balance-soft-min',
+       'balance-soft-std']
+graph_features = ['VG-mean', 'VG-max', 'VG-min', 'VG-std',
+       'VCG-mean', 'VCG-max', 'VCG-min', 'VCG-std']
+horn_features = ['Horn-fraction',
+       'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Horn-V-std']
+used_features = instance_features + balance_features + graph_features + horn_features
 feature = readCSV(feature_file_name)
+feature = feature.loc[:,  used_features]
+
 feature = feature.fillna(0)
 column_selection = (feature.nunique() > unique_value_limit)
 feature = feature.loc[:,  column_selection]
 
-feature = expandFeature(feature)
+#feature = expandFeature(feature)
 
 all_scores = readCSV("result_unweighted.csv")
 best_solver = readCSV("per_instance_best_solver_unweighted.csv")
@@ -113,10 +132,9 @@ for s in solvers:
     # all_pca[s] = pca
     
     reg = RandomForestRegressor()
-    clf = RandomizedSearchCV(reg, parameter_space['RandomForestRegressor'], random_state=0)
-    search = clf.fit(inputInstance, target)
-    print(search.best_params_)
-    all_reg[s] = clf
+    reg.fit(inputInstance, target)
+    
+    all_reg[s] = reg
 
 
 test_instance = feature.iloc[test_ind, 1:]
@@ -128,7 +146,6 @@ for s in solvers:
     cur_result = all_reg[s].predict(processed_test_instance)
     cur_result = cur_result.reshape(len(cur_result), 1)
     test_result = np.hstack((test_result, cur_result))
-
 print("Percentage of correct best solver predicted: ", accuracy(test_result, test_best_solver, solvers))
 
 print("Average score of the prediction: ", averageScore(test_result, test_all_scores, solvers))
