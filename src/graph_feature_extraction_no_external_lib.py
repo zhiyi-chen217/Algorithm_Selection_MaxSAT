@@ -11,12 +11,15 @@ import json
 import numpy as np
 import pandas
 from pandas.io.json import json_normalize
+from scipy.stats import entropy
 
-nv = 0
-limit = 0
 class Node:
     def __init__(self):
         self.edges = set()
+
+def entropyHelper(data, base=None):
+    value,counts = np.unique(data, return_counts=True)
+    return entropy(counts, base=base)
 
 
 def calculateFeature(nodes, prefix):
@@ -28,26 +31,24 @@ def calculateFeature(nodes, prefix):
     result_dic[prefix + "-" + 'max'] = np.max(all_degree)
     result_dic[prefix + "-" + 'min'] = np.min(all_degree)
     result_dic[prefix + "-" + 'std'] = np.std(all_degree)
+    result_dic[prefix + "-" + 'entropy'] = entropyHelper(all_degree)
     return result_dic
 
 
 def addVGEdge(nodes, clause):
-    clause = list(map(lambda c: int(c), clause))
-    clause = list(map(lambda c: abs(c), clause))
+    clause = list(map(lambda c: abs(int(c)), clause))
     for n in clause:
-        if n <= limit:
-            nodes[n - 1].edges.update(clause)
+        nodes[n - 1].edges.update(clause)
 
 
 def addVCGEdge(V_nodes, C_node, clause, count_C):
-    clause = list(map(lambda c: int(c), clause))
-    clause = list(map(lambda c: abs(c), clause))
+    clause = list(map(lambda c: abs(int(c)), clause))
     for n in clause:
         V_nodes[n - 1].edges.add(count_C)
     C_node.edges.update(clause)
 
 
-common = ['mean', 'max', 'min', 'std']
+common = ['mean', 'max', 'min', 'std', 'entropy']
 VG = list(map(lambda s: 'VG-' + s, common))
 VCG = list(map(lambda s: 'VCG-' + s, common))
 all_feature = ['instance'] + VG + VCG
@@ -73,9 +74,8 @@ for root, dirs, files in os.walk("."):
             num = s.split(" ")
             nv = int(num[2])
             nc = int(num[3])
-            limit = int(nv/3)
             
-            for n in range(limit):
+            for n in range(nv):
                 VG_nodes.append(Node())
                 V_nodes.append(Node())
             for n in range(nc):
@@ -88,7 +88,8 @@ for root, dirs, files in os.walk("."):
                 addVGEdge(VG_nodes, clause)
                 addVCGEdge(V_nodes, C_nodes[i], clause, i + 1)
             all_dict = calculateFeature(VG_nodes, "VG")
-            all_dict.update(calculateFeature(V_nodes + C_nodes, "VCG"))
+            all_dict.update(calculateFeature(V_nodes, "VCG_V"))
+            all_dict.update(calculateFeature(C_nodes, "VCG_C"))
             all_dict["instance"] = fname[2:]
             d = d.append(all_dict, ignore_index=True)
 d = d.set_index('instance')

@@ -13,9 +13,16 @@ import json
 import numpy as np
 import pandas
 from pandas.io.json import json_normalize
+from scipy.stats import entropy
+
 class Node:
     def __init__(self):
         self.edges = set()
+        
+def entropyHelper(data, base=None):
+    value,counts = np.unique(data, return_counts=True)
+    return entropy(counts, base=base)
+
         
 def calculateFeature(nodes, prefix):
     all_degree = []
@@ -26,6 +33,7 @@ def calculateFeature(nodes, prefix):
     result_dic[prefix + "-" + 'max'] = np.max(all_degree)
     result_dic[prefix + "-" + 'min'] = np.min(all_degree)
     result_dic[prefix + "-" + 'std'] = np.std(all_degree)
+    result_dic[prefix + "-" + 'entropy'] = entropyHelper(all_degree)
     return result_dic
 
 def addVGEdge(nodes, clause):

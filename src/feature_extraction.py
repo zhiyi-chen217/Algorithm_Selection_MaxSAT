@@ -13,6 +13,12 @@ import json
 import numpy as np
 import pandas
 from pandas.io.json import json_normalize
+from scipy.stats import entropy
+
+def entropyHelper(data, base=None):
+    value,counts = np.unique(data, return_counts=True)
+    return entropy(counts, base=base)
+
 def calculateBalance(data, prefix):
     all_ratio = []
     result_dic = {}
@@ -23,10 +29,11 @@ def calculateBalance(data, prefix):
     result_dic[prefix + "-" + 'max'] = np.max(all_ratio)
     result_dic[prefix + "-" + 'min'] = np.min(all_ratio)
     result_dic[prefix + "-" + 'std'] = np.std(all_ratio)
+    result_dic[prefix + "-" + 'entropy'] = entropyHelper(all_ratio)
     return result_dic
         
-balance = ['balance-hard', 'balance-soft', 'balance-hard-mean', 'balance-hard-max', 'balance-hard-min', 'balance-hard-std',
-           'balance-soft-mean', 'balance-soft-max', 'balance-soft-min', 'balance-soft-std']
+balance = ['balance-hard', 'balance-soft', 'balance-hard-mean', 'balance-hard-max', 'balance-hard-min', 'balance-hard-std', 'balance-hard-entropy',
+           'balance-soft-mean', 'balance-soft-max', 'balance-soft-min', 'balance-soft-std', 'balance-soft-entropy']
 hard_clause = ['nhard_len_stats.ave', 'nhard_len_stats.max',
        'nhard_len_stats.min', 'nhard_len_stats.stddev', 'nhards']
 soft_clause = ['nsoft_len_stats.ave', 'nsoft_len_stats.max', 'nsoft_len_stats.min',
@@ -39,7 +46,7 @@ all_feature = balance + hard_clause + soft_clause + soft_weight + whole_formula
 
 d = pandas.DataFrame(data=[], columns=all_feature)
 
-os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/weighted_maxsat_instances/ms_evals/MS19/mse19-incomplete-weighted-benchmarks/")
+os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_instances/ms_evals/MS19/mse19-incomplete-unweighted-benchmarks")
 
 for root, dirs, files in os.walk("."):
     for file in files:
@@ -82,5 +89,5 @@ for root, dirs, files in os.walk("."):
             d = d.append(j, ignore_index=True)
 
 d = d.set_index('instance')
-d.to_csv("feature_more_balance_feature_weighted.csv")
+d.to_csv("feature_balance.csv")
             
