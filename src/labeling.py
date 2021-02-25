@@ -8,6 +8,7 @@ Created on Mon Dec 14 08:40:13 2020
 
 import pandas as pd
 import numpy as np
+import math
 
 
 def labelling(h_np, solver, s) :
@@ -21,7 +22,8 @@ def labelling(h_np, solver, s) :
         for i in range(h_np.shape[0]):
             row = h_np[i][:]
             highestScore = np.amax(row)
-            label.append(list(solver[row == highestScore]))
+            index = [math.isclose(r, highestScore, rel_tol=0.0001) for r in row]
+            label.append(list(solver[index]))
     return label
 
 
@@ -35,12 +37,12 @@ h.to_csv("result_unweighted.csv")
 
 h_np = h.to_numpy()
 
-label = labelling(h_np, h.columns, 'score')
+label = labelling(h_np, h.columns, 'solver')
 
 dicFrame = {'instance': h.index, 'best-score':label}
 df = pd.DataFrame(data=dicFrame)
 df = df.set_index('instance')
-df.to_csv("per_instance_best_score_unweighted.csv")
+df.to_csv("per_instance_best_solver_unweighted.csv")
     
 
     

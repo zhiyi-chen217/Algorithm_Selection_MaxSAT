@@ -54,7 +54,6 @@ close_solutions/SAT11__application__jarvisalo__smtqfbv-aigs__smtlib-qfbv-aigs-bi
 close_solutions/SAT11__application__manthey__traffic__traffic_3_uc_sat.cnf.wcnf.8.wcnf.gz,"['Loandra', 'SATLike', 'LinSBPS2018', 'sls-mcs', 'sls-mcs-lsu', 'Open-WBO-g']"
 close_solutions/SAT11__application__manthey__traffic__traffic_3_uc_sat.cnf.wcnf.9.wcnf.gz,"['Loandra', 'SATLike', 'LinSBPS2018', 'sls-mcs', 'sls-mcs-lsu', 'Open-WBO-g', 'Open-WBO-ms']"
 close_solutions/SAT11__application__manthey__traffic__traffic_r_sat.cnf.wcnf.4.wcnf.gz,"['Loandra', 'SATLike', 'LinSBPS2018', 'sls-mcs', 'sls-mcs-lsu', 'Open-WBO-g']"
-close_solutions/SAT11__application__rintanen__SATPlanning__blocks-blocks-36-0.170-NOTKNOWN.cnf.wcnf.6.wcnf.gz,"['SATLike', 'sls-mcs', 'sls-mcs-lsu']"
 SeanSafarpour/SM_AS_TOP_buggy1.dimacs.filtered.wcnf.gz,"['sls-mcs', 'sls-mcs-lsu']"
 SeanSafarpour/SM_MAIN_MEM_buggy1.dimacs.filtered.wcnf.gz,"['sls-mcs', 'sls-mcs-lsu']"
 bcp/hipp-yRa1/su/SU-100kb__simp-genos.haps.21.wcnf.gz,"['SATLike', 'sls-mcs', 'sls-mcs-lsu']"
@@ -259,7 +258,6 @@ maxcut/dimacs_mod/san400_0.7_2.clq.wcnf.gz,"['Loandra', 'SATLike', 'sls-mcs', 's
 maxclique/structured/sanr200_0.9.clq.wcnf.gz,['SATLike']
 maxclique/structured/sanr400_0.5.clq.wcnf.gz,"['SATLike', 'Open-WBO-ms']"
 maxclique/structured/sanr400_0.7.clq.wcnf.gz,"['SATLike', 'LinSBPS2018']"
-aes/sbox_8.wcnf.gz,['SATLike']
 set-covering/crafted/scpclr/scpclr11_maxsat.wcnf.gz,"['sls-mcs', 'sls-mcs-lsu']"
 set-covering/crafted/scpclr/scpclr12_maxsat.wcnf.gz,"['sls-mcs', 'sls-mcs-lsu']"
 set-covering/crafted/scpclr/scpclr13_maxsat.wcnf.gz,['Loandra']

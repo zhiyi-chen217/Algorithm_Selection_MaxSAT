@@ -1,5 +1,5 @@
 instance,problem
-hs-timetabling/GreeceWesternGreeceUniversityInstance4.xml.wcnf.gz,hs-timetabling
+hs-timetabling/GreeceWesternGreeceUniversityInstance4.xml.wcnf.gz,other
 xai-mindset2/ecoli.wcnf.gz,xai-mindset2
 xai-mindset2/heart-h.wcnf.gz,xai-mindset2
 xai-mindset2/cleveland.wcnf.gz,xai-mindset2
@@ -27,9 +27,9 @@ SeanSafarpour/rsdecoder-problem.dimacs_41.filtered.wcnf.gz,SeanSafarpour
 SeanSafarpour/spi2.dimacs.filtered.wcnf.gz,SeanSafarpour
 SeanSafarpour/wb_4m8s1.dimacs.filtered.wcnf.gz,SeanSafarpour
 SeanSafarpour/wb_4m8s-problem.dimacs_49.filtered.wcnf.gz,SeanSafarpour
-causal-discovery/causal_n7_i4_N500_uai14_constant_int.wcnf.gz,causal-discovery
-causal-discovery/causal_n7_i6_N500_uai14_harddeps_int.wcnf.gz,causal-discovery
-causal-discovery/causal_n7_i4_N1000_uai14_constant_int.wcnf.gz,causal-discovery
+causal-discovery/causal_n7_i4_N500_uai14_constant_int.wcnf.gz,other
+causal-discovery/causal_n7_i6_N500_uai14_harddeps_int.wcnf.gz,other
+causal-discovery/causal_n7_i4_N1000_uai14_constant_int.wcnf.gz,other
 MaxSATQueriesinInterpretableClassifiers/MLIC_maxsat_benchmarks/tictactoe_train_0_CNF_2_1.wcnf.gz,MaxSATQueriesinInterpretableClassifiers
 MaxSATQueriesinInterpretableClassifiers/MLIC_maxsat_benchmarks/wdbc_train_0_DNF_5_1.wcnf.gz,MaxSATQueriesinInterpretableClassifiers
 MaxSATQueriesinInterpretableClassifiers/MLIC_maxsat_benchmarks/tictactoe_train_1_DNF_5_1.wcnf.gz,MaxSATQueriesinInterpretableClassifiers
@@ -108,10 +108,10 @@ gen-hyper-tw/GenHyperTW_aim-50-2_0-no-3.wcnf.gz,gen-hyper-tw
 gen-hyper-tw/GenHyperTW_par8-2-c.wcnf.gz,gen-hyper-tw
 gen-hyper-tw/GenHyperTW_grid4d_3.wcnf.gz,gen-hyper-tw
 gen-hyper-tw/GenHyperTW_dubois24.wcnf.gz,gen-hyper-tw
-railway-transport/pesp_18Min.wcnf.gz,railway-transport
-railway-transport/d4.wcnf.gz,railway-transport
-railway-transport/we.wcnf.gz,railway-transport
-railway-transport/pesp_5min.wcnf.gz,railway-transport
+railway-transport/pesp_18Min.wcnf.gz,other
+railway-transport/d4.wcnf.gz,other
+railway-transport/we.wcnf.gz,other
+railway-transport/pesp_5min.wcnf.gz,other
 optic/gen_square_5_9999.wcnf.gz,optic
 optic/gen_mult_3_6_9999.wcnf.gz,optic
 optic/gen_mult_5_5_991.wcnf.gz,optic
@@ -147,7 +147,6 @@ close_solutions/SAT04__industrial__velev__pipe-sat-1-1__12pipe_bug6_q0.used-as.s
 close_solutions/SAT11__application__manthey__traffic__traffic_3_uc_sat.cnf.wcnf.8.wcnf.gz,close_solutions
 close_solutions/SAT11__application__jarvisalo__smtqfbv-aigs__smtlib-qfbv-aigs-bin_libsmbsharemodes_vc5759-tseitin.cnf.wcnf.9.wcnf.gz,close_solutions
 close_solutions/SAT04__industrial__velev__pipe-sat-1-1__12pipe_bug4_q0.used-as.sat04-723.cnf.wcnf.1.wcnf.gz,close_solutions
-close_solutions/SAT11__application__rintanen__SATPlanning__blocks-blocks-36-0.170-NOTKNOWN.cnf.wcnf.6.wcnf.gz,close_solutions
 close_solutions/SAT04__industrial__velev__pipe-sat-1-1__12pipe_bug4_q0.used-as.sat04-723.cnf.wcnf.8.wcnf.gz,close_solutions
 close_solutions/SAT11__application__manthey__traffic__traffic_3_uc_sat.cnf.wcnf.9.wcnf.gz,close_solutions
 close_solutions/SAT11__application__fuhs__AProVE11__AProVE11-09.cnf.wcnf.3.wcnf.gz,close_solutions
@@ -277,11 +276,10 @@ min-fill/MinFill_R0_myciel6.wcnf.gz,min-fill
 min-fill/MinFill_R0_queen7_7.wcnf.gz,min-fill
 min-fill/MinFill_R0_queen8_8.wcnf.gz,min-fill
 min-fill/MinFill_R0_myciel7.wcnf.gz,min-fill
-logic-synthesis/normalized-test4.pi.opb.msat.wcnf.gz,logic-synthesis
+logic-synthesis/normalized-test4.pi.opb.msat.wcnf.gz,other
 aes/mul_8_11.wcnf.gz,aes
 aes/mul_8_13.wcnf.gz,aes
 aes/mul_8_9.wcnf.gz,aes
-aes/sbox_8.wcnf.gz,aes
 aes/mul_8_14.wcnf.gz,aes
 MaximumCommonSub-GraphExtraction/solved/g3_n52e77_n57e74_n58e75.wcnf.gz,MaximumCommonSub-GraphExtraction
 MaximumCommonSub-GraphExtraction/solved/g6_n14e13_n14e21_n14e13_n14e13_n14e20_n18e28.wcnf.gz,MaximumCommonSub-GraphExtraction

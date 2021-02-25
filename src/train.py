@@ -20,7 +20,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import tree
 from sklearn.tree import export_text
 from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, Birch
 import graphviz 
 import os
 import ast
@@ -30,8 +30,10 @@ os.chdir("../data")
 
 feature_file_name = "feature_balance_graph_horn_feature_unweighted.csv"
 unique_value_limit = 50
-n_instance = 299
-n_cluster = 3
+n_instance = 297
+n_cluster = 4
+sum_cluster = 0
+sum_rf = 0
 
 parameter_space = {
     'RandomForestRegressor' : {
@@ -48,6 +50,12 @@ parameter_space_grid = {
         'min_samples_split' : [i for i in range(2, 20, 2)]
         }
     }
+dim_reduction = ['balance-hard-std',
+    'ncls',
+    'nsofts',
+    'nvars',
+    'VG-mean',
+    'VG-max']
 def calculateImportance(acc_importance, cur_importance, features):
     f_index = np.argsort(-cur_importance)[:10]
     features = np.array(features)
@@ -63,24 +71,20 @@ def readCSV(fname):
     df = df.set_index('ind')
     return df
 
-def accuracy(scores, best_solver, solvers) :
-    predict_solvers = []
+def accuracy(best_solver, solvers) :
     correct_count = 0
-    for i in range(len(scores)) :
-        predict_solvers.append(solvers[np.argmax(scores[i])])
     for i in range(len(best_solver)) :
-        temp = '\'' + predict_solvers[i] + '\''
-        print(temp)
+        temp = '\'' + solvers[i] + '\''
+        #print(temp)
         if temp in best_solver.iloc[i]:
             correct_count += 1
-    return correct_count / len(scores)
+    return correct_count / len(solvers)
 
-def averageScore(predicted_scores, actual_scores, solvers) :
+def averageScore(actual_scores, solvers) :
     result = 0
-    for i in range(len(predicted_scores)) :
-        predicted_solver = np.argmax(predicted_scores[i])
-        result = result + actual_scores.iloc[i, predicted_solver]
-    return result/len(predicted_scores)
+    for i in range(len(solvers)) :
+        result = result + actual_scores.iloc[i][solvers[i]]
+    return result/len(solvers)
 
 def singleBestSolver(all_scores) :
     all_mean = all_scores.mean()
@@ -104,11 +108,24 @@ def expandFeature(feature) :
             feature[col[i] + '*' + col[j]] = feature.iloc[:,i] * feature.iloc[:,j]
     return feature
 
-def resultAnalysis(predicted_scores, best_scores, true_scores):
+def resultAnalysis(predicted_scores, best_score, true_scores):
+    d = pd.DataFrame(data=[], columns=["instance", "error"])
     for i in range(len(predicted_scores)) :
         predict_solver = np.argmax(predicted_scores[i])
         error =  best_score.iloc[i, 1] - true_scores.iloc[i, predict_solver]
-        print(best_score.iloc[i, 0] + ":" + str(error))
+        d = d.append({"instance" : best_score.iloc[i, 0], "error" : error}, ignore_index=True)
+    return d
+def resultAnalysisCluster(best_score, actual_scores):
+    d = pd.DataFrame(data=[], columns=["instance", "error"])
+    for i in range(len(actual_scores)):
+        error =  best_score.iloc[i, 1] - actual_scores[i]
+        d = d.append({"instance" : best_score.iloc[i, 0], "error" : error}, ignore_index=True)
+    return d
+def bestNSolver(centroid, instance, n):
+    distance = {}
+    for s in solvers:
+        distance[s] = np.linalg.norm(centroid[s] -  instance)
+    return list(dict(sorted(distance.items(), key=lambda item: item[1])).keys())[:n]
 
     
 instance_features = ['instance', 'ncls', 'nhard_len_stats.ave',
@@ -141,76 +158,107 @@ best_solver = readCSV("per_instance_best_solver_unweighted.csv")
 best_score = readCSV("per_instance_best_score_unweighted.csv")
 problem_label = readCSV("problem_label.csv")
 
-rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=0)
-
-for tr, te in rs.split(feature):
-    train_ind = tr
-    test_ind = te
-
-solvers = list(all_scores.columns)
-solvers.remove('instance')
-acc_importance = {}
-features = feature.columns[1:]
-for f in features:
-    acc_importance[f] = 0
+for i in range(0, 40, 3):
+    rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=i)
     
-all_reg = {}
-all_pca = {}
-inputInstance = feature.iloc[train_ind, 1:]
-scaler = StandardScaler()
-inputInstance = scaler.fit_transform(inputInstance)
-all_scaler = scaler
-
-problem_train_label = list(problem_label.iloc[train_ind, 1])
-problem_test_label = list(problem_label.iloc[test_ind, 1])
-skf = StratifiedKFold(n_splits=3)
-
-# supervised learning
-for s in solvers:
-    target = all_scores.loc[train_ind, s]
+    for tr, te in rs.split(feature):
+        train_ind = tr
+        test_ind = te
     
-    reg = DecisionTreeRegressor()
-    # reg = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
-    reg.fit(inputInstance, target)
-    # print(reg.best_params_)
-    # print(features[np.argmax(reg.feature_importances_)])
-    calculateImportance(acc_importance, reg.feature_importances_, features)
-    all_reg[s] = reg
+    solvers = list(all_scores.columns)
+    solvers.remove('instance')
+    acc_importance = {}
+    features = feature.columns[1:]
+    for f in features:
+        acc_importance[f] = 0
+        
+    all_reg = {}
+    all_pca = {}
+    inputInstance = feature.iloc[train_ind, 1:]
+    scaler = StandardScaler()
+    inputInstance = scaler.fit_transform(inputInstance)
+    all_scaler = scaler
+    
+    problem_train_label = list(problem_label.iloc[train_ind, 1])
+    problem_test_label = list(problem_label.iloc[test_ind, 1])
+    skf = StratifiedKFold(n_splits=3)
+    
+    # supervised learning
+    for s in solvers:
+        target = all_scores.loc[train_ind, s]
+        
+        reg = RandomForestRegressor()
+        # reg = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
+        reg.fit(inputInstance, target)
+        # print(reg.best_params_)
+        # print(features[np.argmax(reg.feature_importances_)])
+        #calculateImportance(acc_importance, reg.feature_importances_, features)
+        all_reg[s] = reg
+    
+    # unsupervised clustering
+    scaler_cluster = StandardScaler()
+    input_cluster = scaler_cluster.fit_transform(feature.loc[train_ind, dim_reduction])
+    cluster_best_solver = {}
+    for s in solvers:
+        cluster_best_solver[s] = []
+    train_best_solver = best_solver.loc[train_ind, 'best-solver(s)']
+    for i in range(len(train_best_solver)):
+        instance = input_cluster[i, :]
+        for b in ast.literal_eval(train_best_solver.iloc[i]):
+            if len(cluster_best_solver[b]) == 0:
+                cluster_best_solver[b] = np.array([instance])
+            else:
+                cluster_best_solver[b] = np.vstack((cluster_best_solver[b], instance))
+    centroid = {}
+    for s in solvers:
+        centroid[s] = np.mean(cluster_best_solver[s], axis = 0)
+    
+    test_instance = feature.iloc[test_ind, 1:]
+    test_best_solver = best_solver.loc[test_ind, 'best-solver(s)']
+    test_all_scores = all_scores.iloc[test_ind, 1:]
+    test_result = np.array([[] for i in range(len(test_instance))])
+    for s in solvers:
+        processed_test_instance = preprocessing(test_instance, all_scaler)
+        cur_result = all_reg[s].predict(processed_test_instance)
+        cur_result = cur_result.reshape(len(cur_result), 1)
+        test_result = np.hstack((test_result, cur_result))
+    rf_predicted_solver = []
+    for i in range(len(test_result)) :
+        rf_predicted_solver.append(solvers[np.argmax(test_result[i])])
+        
+    prediction = []
+    test_instance_cluster = scaler_cluster.transform(feature.loc[test_ind, dim_reduction])
+    for i in range(len(test_instance_cluster)):
+        prediction.append(bestNSolver(centroid, test_instance_cluster[i], 5))
+    result_rf = resultAnalysis(test_result, best_score.loc[test_ind], test_all_scores)
+    print("Average score of the prediction without clustering: ", averageScore(test_all_scores, rf_predicted_solver))
+    sum_rf += averageScore(test_all_scores, rf_predicted_solver)
+    test_instance = all_scores.iloc[test_ind, :1]
+    for i in range(len(rf_predicted_solver)):
+        if not (rf_predicted_solver[i] in prediction[i]):
+            if (solvers[np.argsort(-test_result[i])[1]] in prediction[i][:1]) and (test_result[i][np.argsort(-test_result[i])[0]] - test_result[i][np.argsort(-test_result[i])[1]] < 0.01):
+                rf_predicted_solver[i] = solvers[np.argsort(-test_result[i])[1]]
+            
+            
+    print("Percentage of correct best solver predicted: ", accuracy(test_best_solver, rf_predicted_solver))
+    sum_cluster += averageScore(test_all_scores, rf_predicted_solver)
+    print("Average score of the prediction: ", averageScore(test_all_scores, rf_predicted_solver))
+    
+    print(singleBestSolver(test_all_scores))
+    
+    print(oracleAveScore(best_score.iloc[test_ind, 1:]))
+    
 
-# unsupervised clustering
-dim_reduction = list(dict(sorted(acc_importance.items(), key=lambda item: -item[1])).keys())[:10]
-input_cluster = feature.loc[train_ind, dim_reduction]
-kmeans = KMeans(n_clusters=n_cluster, random_state=0, init='k-means++').fit(input_cluster)
-clusters = kmeans.predict(input_cluster)
-cluster_best_solver = {}
-for i in range(n_cluster):
-    cluster_best_solver[i] = {}
-train_best_solver = best_solver.loc[train_ind, 'best-solver(s)']
-for i in range(len(train_best_solver)):
-    c = clusters[i]
-    cur_best_solver = cluster_best_solver[c]
-    for b in ast.literal_eval(train_best_solver.iloc[i]):
-        if b in cur_best_solver:
-            cur_best_solver[b] += 1
-        else:
-            cur_best_solver[b] = 1
+    
+            
+    result_cl = []
+    for i in range(len(prediction)) :
+        result_cl.append(np.amax([test_all_scores.iloc[i][prediction[i][0]]]))
+    result_cluster = resultAnalysisCluster(best_score.loc[test_ind], result_cl)
 
-test_instance = feature.iloc[test_ind, 1:]
-test_best_solver = best_solver.loc[test_ind, 'best-solver(s)']
-test_all_scores = all_scores.iloc[test_ind, 1:]
-test_result = np.array([[] for i in range(len(test_instance))])
-for s in solvers:
-    processed_test_instance = preprocessing(test_instance, all_scaler)
-    cur_result = all_reg[s].predict(processed_test_instance)
-    cur_result = cur_result.reshape(len(cur_result), 1)
-    test_result = np.hstack((test_result, cur_result))
-print("Percentage of correct best solver predicted: ", accuracy(test_result, test_best_solver, solvers))
 
-print("Average score of the prediction: ", averageScore(test_result, test_all_scores, solvers))
 
-print(singleBestSolver(test_all_scores))
 
-print(oracleAveScore(best_score.iloc[test_ind, 1:]))
 
 
 
