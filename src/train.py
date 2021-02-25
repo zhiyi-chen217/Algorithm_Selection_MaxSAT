@@ -28,7 +28,7 @@ import ast
 
 os.chdir("../data")
 
-feature_file_name = "feature_balance_graph_horn_feature_unweighted.csv"
+feature_file_name = "feature_extended_unweighted.csv"
 unique_value_limit = 50
 n_instance = 297
 n_cluster = 4
@@ -135,11 +135,13 @@ instance_features = ['instance', 'ncls', 'nhard_len_stats.ave',
        'nvars', 'soft_wt_stats.ave', 'soft_wt_stats.max', 'soft_wt_stats.min',
        'soft_wt_stats.stddev']
 balance_features = ['balance-hard', 'balance-hard-max', 'balance-hard-mean',
-       'balance-hard-min', 'balance-hard-std', 'balance-soft',
+       'balance-hard-min', 'balance-hard-std', 'balance-hard-entropy','balance-soft',
        'balance-soft-max', 'balance-soft-mean', 'balance-soft-min',
-       'balance-soft-std']
-graph_features = ['VG-mean', 'VG-max', 'VG-min', 'VG-std',
-       'VCG-mean', 'VCG-max', 'VCG-min', 'VCG-std']
+       'balance-soft-std', 'balance-soft-entropy']
+graph_features = ['VG-mean',
+       'VG-max', 'VG-min', 'VG-std', 'VG-entropy', 'VCG_C-entropy',
+       'VCG_C-max', 'VCG_C-mean', 'VCG_C-min', 'VCG_C-std', 'VCG_V-entropy',
+       'VCG_V-max', 'VCG_V-mean', 'VCG_V-min', 'VCG_V-std']
 horn_features = ['Horn-fraction',
        'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Horn-V-std']
 all_features = instance_features + balance_features + graph_features + horn_features
