@@ -56,8 +56,7 @@ all_feature = ['instance'] + VG + VCG
 d = pandas.DataFrame(data=[], columns=all_feature)
 
 
-os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_instances/ms_evals/MS19/mse19-incomplete-unweighted"
-         "-benchmarks")
+os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_unweighted_300_2018/maxsat_instances/ms_evals/MS18/mse18-incomplete-unweighted-benchmarks/")
 for root, dirs, files in os.walk("."):
     for file in files:
         if file.endswith(".gz"):
@@ -88,8 +87,7 @@ for root, dirs, files in os.walk("."):
                 addVGEdge(VG_nodes, clause)
                 addVCGEdge(V_nodes, C_nodes[i], clause, i + 1)
             all_dict = calculateFeature(VG_nodes, "VG")
-            all_dict.update(calculateFeature(V_nodes, "VCG_V"))
-            all_dict.update(calculateFeature(C_nodes, "VCG_C"))
+            all_dict.update(calculateFeature(V_nodes + C_nodes, "VCG"))
             all_dict["instance"] = fname[2:]
             d = d.append(all_dict, ignore_index=True)
 d = d.set_index('instance')

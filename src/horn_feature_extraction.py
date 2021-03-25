@@ -42,8 +42,8 @@ all_feature = ['instance', 'Horn-fraction'] + HV
 d = pandas.DataFrame(data=[], columns=all_feature)
 
 
-os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_instances/ms_evals/MS19/mse19-incomplete-unweighted"
-         "-benchmarks")
+os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/"
+         "weighted_maxsat_instances/ms_evals/MS19/mse19-incomplete-weighted-benchmarks/")
 for root, dirs, files in os.walk("."):
     for file in files:
         if file.endswith(".gz"):
@@ -62,6 +62,8 @@ for root, dirs, files in os.walk("."):
 
             for i in range(nc):
                 s = f.readline()
+                if s.startswith("c"):
+                    continue
                 clause = s.split(" ")
                 clause = clause[1:len(clause) - 1]
                 count = addHornEdge(V_nodes, clause, count)
@@ -71,4 +73,4 @@ for root, dirs, files in os.walk("."):
             d = d.append(all_dict, ignore_index=True)
 
 d = d.set_index("instance")
-d.to_csv("horn_feature.csv")
+d.to_csv("weighted_horn_feature.csv")

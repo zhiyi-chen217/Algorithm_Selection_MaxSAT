@@ -46,7 +46,7 @@ all_feature = balance + hard_clause + soft_clause + soft_weight + whole_formula
 
 d = pandas.DataFrame(data=[], columns=all_feature)
 
-os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_instances/ms_evals/MS19/mse19-incomplete-unweighted-benchmarks")
+os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_unweighted_300_2018/maxsat_instances/ms_evals/MS18/mse18-incomplete-unweighted-benchmarks/")
 
 for root, dirs, files in os.walk("."):
     for file in files:
