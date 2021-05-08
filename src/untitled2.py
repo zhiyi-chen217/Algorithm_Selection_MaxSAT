@@ -131,15 +131,13 @@ feature = readCSV(feature_file_name)
 feature = feature.loc[:,  used_features]
 all_scores = readCSV(result_file_name)
 feature = feature.fillna(0)
-all_solver_features = feature_selection.selectFeature(feature, all_scores, expand_n)
 feature = feature.iloc[:, 1:]
-feature = expandFeature(feature, expand_n)
 
 best_solver = readCSV(best_solver_file_name)
 best_score = readCSV(best_score_file_name)
 problem_label = readCSV(problem_label_file_name)
 
-rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=3)
+rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=5)
 
 for tr, te in rs.split(feature):
     train_ind = tr
@@ -161,15 +159,10 @@ skf = StratifiedKFold(n_splits=3)
 for s in solvers:
     target = all_scores.loc[train_ind, s]
     
-    # pca = PCA(n_components=6)
-    # inputInstance = pca.fit_transform(inputInstance)
-    # all_pca[s] = pca
-    
-    reg = DecisionTreeRegressor()
+    reg = RandomForestRegressor()
     # clf = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
-    # clf.fit(inputInstance.loc[:, all_solver_features[s]], target)
-    reg.fit(inputInstance.loc[:, all_solver_features[s]], target)
-    print("{}: {}".format(s, reg.score(inputInstance.loc[:, all_solver_features[s]], target)))
+    reg.fit(inputInstance, target)
+    print("{}: {}".format(s, reg.score(inputInstance, target)))
     all_reg[s] = reg
 
 
@@ -179,7 +172,7 @@ test_all_scores = all_scores.iloc[test_ind, 1:]
 test_result = np.array([[] for i in range(len(test_instance))])
 for s in solvers:
     processed_test_instance = pd.DataFrame(preprocessing(test_instance, all_scaler), columns=test_instance.columns)
-    cur_result = all_reg[s].predict(processed_test_instance.loc[:, all_solver_features[s]])
+    cur_result = all_reg[s].predict(processed_test_instance)
     cur_result = cur_result.reshape(len(cur_result), 1)
     test_result = np.hstack((test_result, cur_result))
 print("Percentage of correct best solver predicted: ", accuracy(test_result, test_best_solver, solvers))

@@ -31,7 +31,11 @@ import ast
 
 os.chdir("../data")
 
-feature_file_name = "feature_balance_graph_horn_feature_unweighted.csv"
+feature_file_name = "feature_more_balance_feature_weighted.csv"
+result_file_name = "result_weighted.csv"
+best_solver_file_name = "per_instance_best_solver_weighted.csv"
+best_score_file_name = "per_instance_best_score_weighted.csv"
+problem_label_file_name = "problem_label.csv"
 unique_value_limit = 50
 n_instance = 297
 n_cluster = 4
@@ -41,7 +45,7 @@ sum_prob = 0
 sum_prob_distribution = 0
 sum_sb = 0
 sum_oracle = 0
-n_iteration = 20
+n_iteration = 5
 special_instance = {}
 parameter_space = {
     'RandomForestRegressor' : {
@@ -58,23 +62,7 @@ parameter_space_grid = {
         'min_samples_split' : [i for i in range(2, 20, 2)]
         }
     }
-dim_reduction = ['balance-hard-std',
- 'balance-hard',
- 'nsofts',
- 'VCG-max',
- 'Horn-V-mean',
- 'Horn-V-max',
- 'VG-mean',
- 'VG-max',
- 'ncls',
- 'nhards',
- 'Horn-fraction',
- 'nhard_len_stats.ave',
- 'nhard_len_stats.stddev',
- 'nvars',
- 'VCG-mean',
- 'VCG-std',
- 'nhard_len_stats.max']
+
 def calculateImportance(acc_importance, cur_importance, features):
     f_index = np.argsort(-cur_importance)[:10]
     features = np.array(features)
@@ -164,7 +152,7 @@ graph_features = ['VG-mean',
 horn_features = ['Horn-fraction',
        'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Horn-V-std']
 extra = ['balance-hard-entropy', 'balance-soft-entropy', 'VG-entropy']
-all_features = instance_features + balance_features + graph_features + horn_features
+all_features = instance_features + balance_features
 used_features = all_features
 feature = readCSV(feature_file_name)
 feature = feature.loc[:,  used_features]
@@ -172,13 +160,13 @@ feature = feature.loc[:,  used_features]
 feature = feature.fillna(0)
 column_selection = (feature.nunique() > unique_value_limit)
 feature = feature.loc[:,  column_selection]
+dim_reduction = feature.columns[1:]
+#feature = expandFeature(feature)
 
-feature = expandFeature(feature)
-
-all_scores = readCSV("result_unweighted.csv")
-best_solver = readCSV("per_instance_best_solver_unweighted.csv")
-best_score = readCSV("per_instance_best_score_unweighted.csv")
-problem_label = readCSV("problem_label.csv")
+all_scores = readCSV(result_file_name)
+best_solver = readCSV(best_solver_file_name)
+best_score = readCSV(best_score_file_name)
+problem_label = readCSV(problem_label_file_name)
 
 for i in range(n_iteration):
     rs = StratifiedShuffleSplit(n_splits=1, random_state=np.random.randint(40), test_size=0.25)
@@ -209,7 +197,7 @@ for i in range(n_iteration):
     for s in solvers:
         target = all_scores.loc[train_ind, s]
         
-        reg = RandomForestRegressor()
+        reg = DecisionTreeRegressor()
         # reg = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
         reg.fit(inputInstance, target)
         # print(reg.best_params_)
