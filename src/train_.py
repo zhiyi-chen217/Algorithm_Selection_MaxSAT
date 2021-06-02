@@ -23,11 +23,11 @@ import os
 
 os.chdir("../data")
 
-feature_file_name = "feature_more_balance_feature_weighted.csv"
-result_file_name = "result_weighted.csv"
-best_solver_file_name = "per_instance_best_solver_weighted.csv"
-best_score_file_name = "per_instance_best_score_weighted.csv"
-problem_label_file_name = "problem_label.csv"
+feature_file_name = "feature_extended_unweighted.csv"
+result_file_name = "result_unweighted.csv"
+best_solver_file_name = "per_instance_best_solver_unweighted.csv"
+best_score_file_name = "per_instance_best_score_unweighted.csv"
+# problem_label_file_name = "problem_label.csv"
 n_instance = 297
 expand_n = 3
 
@@ -62,7 +62,6 @@ def accuracy(scores, best_solver, solvers) :
         predict_solvers.append(solvers[np.argmax(scores[i])])
     for i in range(len(best_solver)) :
         temp = '\'' + predict_solvers[i] + '\''
-        print(temp)
         if temp in best_solver.iloc[i]:
             correct_count += 1
     return correct_count / len(scores)
@@ -76,7 +75,7 @@ def averageScore(predicted_scores, actual_scores) :
 
 def singleBestSolver(all_scores) :
     all_mean = all_scores.mean()
-    return all_mean.max
+    return all_mean.max()
 
 def oracleAveScore(data):
     return data.mean()
@@ -126,18 +125,19 @@ graph_features = ['VG-mean', 'VG-max', 'VG-min', 'VG-std',
        'VCG-mean', 'VCG-max', 'VCG-min', 'VCG-std']
 horn_features = ['Horn-fraction',
        'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Horn-V-std']
-used_features = instance_features + balance_features
+
+used_features = instance_features + balance_features + graph_features + horn_features
 feature = readCSV(feature_file_name)
-feature = feature.loc[:,  used_features]
+# feature = feature.loc[:,  used_features]
 all_scores = readCSV(result_file_name)
 feature = feature.fillna(0)
-all_solver_features = feature_selection.selectFeature(feature, all_scores, expand_n)
+# all_solver_features = feature_selection.selectFeature(feature, all_scores, expand_n)
 feature = feature.iloc[:, 1:]
-feature = expandFeature(feature, expand_n)
+# feature = expandFeature(feature, expand_n)
 
 best_solver = readCSV(best_solver_file_name)
 best_score = readCSV(best_score_file_name)
-problem_label = readCSV(problem_label_file_name)
+#problem_label = readCSV(problem_label_file_name)
 
 rs = ShuffleSplit(n_splits=1, test_size=.25, random_state=3)
 
@@ -154,8 +154,8 @@ scaler = StandardScaler()
 inputInstance = pd.DataFrame(scaler.fit_transform(inputInstance), columns=inputInstance.columns)
 all_scaler = scaler
 
-problem_train_label = list(problem_label.iloc[train_ind, 1])
-problem_test_label = list(problem_label.iloc[test_ind, 1])
+# problem_train_label = list(problem_label.iloc[train_ind, 1])
+# problem_test_label = list(problem_label.iloc[test_ind, 1])
 skf = StratifiedKFold(n_splits=3)
 
 for s in solvers:
@@ -168,8 +168,8 @@ for s in solvers:
     reg = DecisionTreeRegressor()
     # clf = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
     # clf.fit(inputInstance.loc[:, all_solver_features[s]], target)
-    reg.fit(inputInstance.loc[:, all_solver_features[s]], target)
-    print("{}: {}".format(s, reg.score(inputInstance.loc[:, all_solver_features[s]], target)))
+    reg.fit(inputInstance, target)
+    # print("{}: {}".format(s, reg.score(inputInstance.loc[:, all_solver_features[s]], target)))
     all_reg[s] = reg
 
 
@@ -179,14 +179,14 @@ test_all_scores = all_scores.iloc[test_ind, 1:]
 test_result = np.array([[] for i in range(len(test_instance))])
 for s in solvers:
     processed_test_instance = pd.DataFrame(preprocessing(test_instance, all_scaler), columns=test_instance.columns)
-    cur_result = all_reg[s].predict(processed_test_instance.loc[:, all_solver_features[s]])
+    cur_result = all_reg[s].predict(processed_test_instance)
     cur_result = cur_result.reshape(len(cur_result), 1)
     test_result = np.hstack((test_result, cur_result))
 print("Percentage of correct best solver predicted: ", accuracy(test_result, test_best_solver, solvers))
 
 print("Average score of the prediction: ", averageScore(test_result, test_all_scores))
 
-print(singleBestSolver(test_all_scores))
+print("Single Best Solver: ", singleBestSolver(test_all_scores))
 
 print(oracleAveScore(best_score.iloc[test_ind, 1:]))
 
