@@ -122,6 +122,7 @@ balance_features = ['balance-hard', 'balance-hard-max', 'balance-hard-mean',
        'balance-hard-min', 'balance-hard-std', 'balance-soft',
        'balance-soft-max', 'balance-soft-mean', 'balance-soft-min',
        'balance-soft-std']
+
 graph_features = ['VG-mean', 'VG-max', 'VG-min', 'VG-std', 'VG-entropy', 'VCG_C-entropy', 'VCG_C-max', 'VCG_C-mean',
                   'VCG_C-min', 'VCG_C-std', 'VCG_V-entropy', 'VCG_V-max', 'VCG_V-mean', 'VCG_V-min', 'VCG_V-std']
 horn_features = ['Horn-fraction', 'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Horn-V-std']
@@ -129,11 +130,12 @@ horn_features = ['Horn-fraction', 'Horn-V-mean', 'Horn-V-max', 'Horn-V-min', 'Ho
 used_features = instance_features + graph_features
 feature = readCSV(feature_file_name)
 #feature = feature.loc[:,  used_features]
+
 all_scores = readCSV(result_file_name)
 feature = feature.fillna(0)
 # all_solver_features = feature_selection.selectFeature(feature, all_scores, expand_n)
 feature = feature.iloc[:, 1:]
-feature = expandFeature(feature, expand_n)
+# feature = expandFeature(feature, expand_n)
 
 best_solver = readCSV(best_solver_file_name)
 best_score = readCSV(best_score_file_name)
@@ -169,9 +171,6 @@ for s in solvers:
     # clf = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
     # clf.fit(inputInstance.loc[:, all_solver_features[s]], target)
     reg.fit(inputInstance, target)
-    r = export_text(reg, feature_names=list(inputInstance.columns))
-    print("for {}:".format(s))
-    print(r)
     # print("{}: {}".format(s, reg.score(inputInstance.loc[:, all_solver_features[s]], target)))
     all_reg[s] = reg
 
