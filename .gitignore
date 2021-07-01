@@ -1,0 +1,8 @@
+# folders
+.idea
+src/__pycache__
+src/python/__pycache__
+
+# file types
+*.csv#
+

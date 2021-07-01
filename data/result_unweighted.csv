@@ -89,12 +89,12 @@ mbd/b14_C-mbd14-0337.wcnf.gz,1,0.7813,1,0.8333,0.8333,0.8929,0.9259
 mbd/b14_C-mbd14-0388.wcnf.gz,1,0.7,1,0.7778,0.875,0.4667,0.913
 mbd/b21_C-mbd14-0218.wcnf.gz,1,0.675,1,0.7297,0.5625,0.9643,0.9643
 mbd/b21_C-mbd14-0322.wcnf.gz,1,0.4561,1,0.5417,0.5417,0.6842,0.5909
-maxcut/dimacs_mod/brock200_1.clq.dimacs_mod.wcnf.gz,0.9945,1,0.9945,0.989,0.989,1,0.9945
+maxcut/dimacs_mod/brock200_1.clq.wcnf.gz,0.9945,1,0.9945,0.989,0.989,1,0.9945
 maxclique/structured/brock200_1.clq.wcnf.gz,0.9917,1,0.9958,1,1,0.9447,0.9755
-maxcut/dimacs_mod/brock400_2.clq.dimacs_mod.wcnf.gz,0.9947,1,0.9921,0.9921,0.9921,0.9947,0.9921
+maxcut/dimacs_mod/brock400_2.clq.wcnf.gz,0.9947,1,0.9921,0.9921,0.9921,0.9947,0.9921
 maxclique/structured/brock400_2.clq.wcnf.gz,0.9768,1,0.9806,1,1,0.9768,0.9922
 maxclique/structured/brock400_3.clq.wcnf.gz,0.9947,1,0.9947,0.9921,0.9921,0.9947,0.9947
-maxcut/dimacs_mod/brock800_1.clq.dimacs_mod.wcnf.gz,0.9974,1,0.9987,0.9949,0.9949,0.9974,0.9974
+maxcut/dimacs_mod/brock800_1.clq.wcnf.gz,0.9974,1,0.9987,0.9949,0.9949,0.9974,0.9974
 maxclique/structured/brock800_1.clq.wcnf.gz,0.9763,1,1,1,1,0.9238,0.945
 maxclique/structured/brock800_3.clq.wcnf.gz,0.9974,1,0.9987,0.9962,0.9962,0.9974,0.9987
 maxclique/structured/brock800_4.clq.wcnf.gz,0.9987,1,0.9974,0.9949,0.9987,0.9974,0.9962

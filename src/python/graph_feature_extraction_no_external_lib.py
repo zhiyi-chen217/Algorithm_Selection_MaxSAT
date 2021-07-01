@@ -17,6 +17,7 @@ class Node:
     def __init__(self):
         self.edges = set()
 
+
 def entropyHelper(data, base=None):
     value,counts = np.unique(data, return_counts=True)
     return entropy(counts, base=base)
@@ -56,7 +57,7 @@ all_feature = ['instance'] + VG + VCG
 d = pandas.DataFrame(data=[], columns=all_feature)
 
 
-os.chdir("/Users/chenzhiyi/Desktop/HonoursProgram/maxsat_unweighted_300_2018/maxsat_instances/ms_evals/MS18/mse18-incomplete-unweighted-benchmarks/")
+os.chdir("/home/zhiyi/Desktop/Algorithm_Selection/maxsat_instances/ms_evals/MS20/mse20-incomplete-unweighted/phylogenetic-trees/")
 for root, dirs, files in os.walk("."):
     for file in files:
         if file.endswith(".gz"):

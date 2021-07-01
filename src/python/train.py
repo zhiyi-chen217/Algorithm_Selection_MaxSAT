@@ -24,7 +24,6 @@ from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans, Birch
 from scipy.special import softmax
 from random import choices
-import graphviz 
 import os
 import ast
 

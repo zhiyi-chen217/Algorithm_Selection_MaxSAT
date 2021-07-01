@@ -1,0 +1,20 @@
+digraph {
+	node [fontsize=5 style=filled]
+	size="10,10"
+	"" [label="feature: balance-hard-entropy
+threshold: 0.6509862840175629"]
+	0 [label="feature: Horn-V-std
+threshold: 16.933521270751953"]
+	1 [label="feature: nhard_len_stats.stddev
+threshold: 2.0800000429153442"]
+	00 [label="label: sls-mcs"]
+	01 [label="label: Loandra"]
+	10 [label="label: Loandra"]
+	11 [label="label: SATLike"]
+	"" -> 0
+	"" -> 1
+	0 -> 00
+	0 -> 01
+	1 -> 10
+	1 -> 11
+}

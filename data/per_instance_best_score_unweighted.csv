@@ -89,12 +89,12 @@ mbd/b14_C-mbd14-0337.wcnf.gz,1
 mbd/b14_C-mbd14-0388.wcnf.gz,1
 mbd/b21_C-mbd14-0218.wcnf.gz,1
 mbd/b21_C-mbd14-0322.wcnf.gz,1
-maxcut/dimacs_mod/brock200_1.clq.dimacs_mod.wcnf.gz,1
+maxcut/dimacs_mod/brock200_1.clq.wcnf.gz,1
 maxclique/structured/brock200_1.clq.wcnf.gz,1
-maxcut/dimacs_mod/brock400_2.clq.dimacs_mod.wcnf.gz,1
+maxcut/dimacs_mod/brock400_2.clq.wcnf.gz,1
 maxclique/structured/brock400_2.clq.wcnf.gz,1
 maxclique/structured/brock400_3.clq.wcnf.gz,1
-maxcut/dimacs_mod/brock800_1.clq.dimacs_mod.wcnf.gz,1
+maxcut/dimacs_mod/brock800_1.clq.wcnf.gz,1
 maxclique/structured/brock800_1.clq.wcnf.gz,1
 maxclique/structured/brock800_3.clq.wcnf.gz,1
 maxclique/structured/brock800_4.clq.wcnf.gz,1

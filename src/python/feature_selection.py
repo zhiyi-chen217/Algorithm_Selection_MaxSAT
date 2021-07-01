@@ -11,13 +11,7 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn.model_selection import ShuffleSplit
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.tree import DecisionTreeRegressor
-from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import GridSearchCV
 from itertools import chain, combinations
 import os
 import math
