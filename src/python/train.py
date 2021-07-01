@@ -28,7 +28,7 @@ import os
 import ast
 
 
-os.chdir("../data")
+os.chdir("../../data")
 
 feature_file_name = "feature_more_balance_feature_weighted.csv"
 result_file_name = "result_weighted.csv"
