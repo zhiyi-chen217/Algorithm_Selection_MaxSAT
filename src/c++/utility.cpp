@@ -81,7 +81,23 @@ vector<vector<float>> readCSV(fstream* fin, int n_instance, int n_feature) {
     }
     fin->close();
     return data;
-    
+}
+
+void splitData(vector<vector<float>>& data, vector<vector<float>>& train, vector<vector<float>>& test, int start, int end) {
+    int n_instance = data.size();
+    int test_size = end - start;
+    // load first part training data
+    for (int i = 0; i < start; i++) {
+        train[i] = data[i];
+    }
+    // load testing data
+    for (int i = start; i < end; i++) {
+        test[i - start] = data[i];
+    }
+    // load second part training data
+    for (int i = end; i < n_instance; i++) {
+        train[i - test_size] = data[i];
+    }
 }
 
 map<int, string> createMap(string l) {

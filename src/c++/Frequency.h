@@ -11,6 +11,8 @@ using namespace std;
 #define FEATURE_FILE_NAME "feature_unweighted.csv"
 #define RESULT_FILE_NAME "result_unweighted.csv"
 #define PRED_FILE_NAME "predicate.csv"
+#define SBS_IND 0
+#define N_ITER 5
 
 vector<vector<float>> computeSingleFQ(vector<vector<float>>& data, vector<vector<float>>& result, vector<tuple<int, float>>& predicate);
 

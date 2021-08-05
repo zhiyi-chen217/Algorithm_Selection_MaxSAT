@@ -10,9 +10,29 @@ float computeGain(MurTree& tree, vector<vector<float>> data, vector<vector<float
         int label = tree.classify(data[i]);
         gain += result[i][label];
     }
+    gain = gain / n_instance;
+
     return gain;
 }
 
+float computeOracleGain(vector<vector<float>> result) {
+    int n_instance = result.size();
+    float gain = 0;
+    for (int i = 0; i < n_instance; i++) {
+        int max_ind = argmax(result[i]);
+        gain += result[i][max_ind];
+    }
+    return gain / n_instance;
+}
+
+float computeSBSGain(vector<vector<float>> result) {
+    int n_instance = result.size();
+    float gain = 0;
+    for (int i = 0; i < n_instance; i++) {
+        gain += result[i][SBS_IND];
+    }
+    return gain / n_instance;
+}
 
 float findDepthTwo(PNode* root, vector<vector<float>> data, vector<vector<float>> result, vector<tuple<int, float>> predicate) {
     // mata data
@@ -204,6 +224,7 @@ float findOptimalTree(PNode* root, vector<vector<float>> data, vector<vector<flo
 int main() {
     fstream fin;
     string temp;
+    cout << "start" << endl;
     // read feature data 
     fin.open(FEATURE_FILE_NAME, ios::in);
     getline(fin, temp);
@@ -219,12 +240,37 @@ int main() {
     // read predicates
     vector<tuple<int, float>> predicates = readPred(PRED_FILE_NAME);
 
-    PNode* root = new PNode(1, 2);
+    // split train test
+    int test_size = (int)(N_INSTANCE / N_ITER);
+    int train_size = N_INSTANCE - test_size;
+    vector<vector<float>> train_feature(train_size, vector<float>(N_FEATURE));
+    vector<vector<float>> test_feature(test_size, vector<float>(N_FEATURE));
+    
+    vector<vector<float>> train_result(train_size, vector<float>(N_CLASS));
+    vector<vector<float>> test_result(test_size, vector<float>(N_CLASS));
 
-    float result = findOptimalTree(root, features, results_solvers, predicates, 4);
+    // N-fold validation
+    for (int i = 0; i < N_ITER; i++) {
+        int start = i * test_size;
+        int end = (i + 1) * test_size;
 
-    MurTree tree(root);
-    float gain = computeGain(tree, features, results_solvers);
-    deleteTree(root);
-    cout << result << endl;
+        // split data for current iteration
+        splitData(features, train_feature, test_feature, start, end);
+        splitData(results_solvers, train_result, test_result, start, end);
+
+        PNode* root = new PNode(1, 2);
+        float result = findOptimalTree(root, features, results_solvers, predicates, 3);
+
+        MurTree tree(root);
+        float gain = computeGain(tree, test_feature, test_result);
+        float oracle = computeOracleGain(test_result);
+        float SBS_gain = computeSBSGain(test_result);
+
+        cout << "Average score of the prediction: " << gain << endl;
+        cout << "Score of the single best solver: " << SBS_gain << endl;
+        cout << "Score of the oracle: " << oracle << endl;
+
+        deleteTree(root);
+    }
+
 }

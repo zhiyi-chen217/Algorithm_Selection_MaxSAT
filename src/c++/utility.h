@@ -19,7 +19,7 @@ vector<tuple<int, float>> readPred(string filename);
 
 vector<vector<float>> readCSV(fstream* fin, int n_instance, int n_feature);
 
-
 map<int, string> createMap(string l);
 
+void splitData(vector<vector<float>>& data, vector<vector<float>>& train, vector<vector<float>>& test, int start, int end);
 
