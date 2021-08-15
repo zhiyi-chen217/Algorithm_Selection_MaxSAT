@@ -73,6 +73,7 @@ vector<vector<float>> readCSV(fstream* fin, int n_instance, int n_feature) {
         stringstream row_stream(row);
         string feature;
         int c = 0;
+        getline(row_stream, feature, ',');
         while (getline(row_stream, feature, ','))
         {
             data[i][c] = stof(feature);

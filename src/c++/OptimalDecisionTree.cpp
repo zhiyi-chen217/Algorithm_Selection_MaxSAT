@@ -226,13 +226,13 @@ int main() {
     string temp;
     cout << "start" << endl;
     // read feature data 
-    fin.open(FEATURE_FILE_NAME, ios::in);
+    fin.open(string(DIR) + string(FEATURE_FILE_NAME), ios::in);
     getline(fin, temp);
     map <int, string> feature_map = createMap(temp);
     vector<vector<float>> features = readCSV(&fin, N_INSTANCE, N_FEATURE);
 
     // read result data
-    fin.open(RESULT_FILE_NAME, ios::in);
+    fin.open(string(DIR) + string(RESULT_FILE_NAME), ios::in);
     getline(fin, temp);
     map <int, string> class_map = createMap(temp);
     vector<vector<float>> results_solvers = readCSV(&fin, N_INSTANCE, N_CLASS);
@@ -259,7 +259,7 @@ int main() {
         splitData(results_solvers, train_result, test_result, start, end);
 
         PNode* root = new PNode(1, 2);
-        float result = findOptimalTree(root, features, results_solvers, predicates, 3);
+        float result = findOptimalTree(root, features, results_solvers, predicates, 2);
 
         MurTree tree(root);
         float gain = computeGain(tree, test_feature, test_result);
