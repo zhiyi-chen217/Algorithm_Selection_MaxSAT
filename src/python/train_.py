@@ -12,7 +12,6 @@ from sklearn.tree import DecisionTreeRegressor, export_text
 from sklearn import svm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import GridSearchCV
 from itertools import chain, combinations
 import os
@@ -32,16 +31,39 @@ parameter_space = {
         'n_estimators' : [i for i in range(10, 30, 2)],
         'min_samples_leaf' : [i for i in range(1, 10, 2)],
         'min_samples_split' : [i for i in range(2, 20, 2)]
-        }
+        },
+    'DecisionTreeRegressor' : {
+        'criterion': ['mse', 'friedman_mse', 'mae', 'poisson'],
+        'splitter': ['best, random'],
+        'max_depth': [2,3,4,5,8,10,15],
+        'min_samples_split': [i for i in range(2, 20, 2)],
+        'min_samples_leaf' : [i for i in range(1, 10, 2)],
     }
+}
 
 parameter_space_grid = {
     'RandomForestRegressor' : {
         'n_estimators' : [i for i in range(10, 60, 2)],
         'min_samples_leaf' : [i for i in range(1, 10, 2)],
         'min_samples_split' : [i for i in range(2, 20, 2)]
-        }
+        },
+    'DecisionTreeRegressor': {
+        'criterion': ['mse', 'friedman_mse', 'mae', 'poisson'],
+        'max_depth': [2, 3, 4, 5, 8, 10, 15],
+        'min_samples_split': [i for i in range(2, 20, 2)],
+        'min_samples_leaf': [i for i in range(1, 10, 2)],
     }
+}
+
+best_param = {
+    'Loandra' : {'criterion': 'mse', 'max_depth': 4, 'min_samples_leaf': 1, 'min_samples_split': 4},
+    'SATLike': {'criterion': 'mse', 'max_depth': 4, 'min_samples_leaf': 7, 'min_samples_split': 16},
+    'LinSBPS2018': {'criterion': 'friedman_mse', 'max_depth': 5, 'min_samples_leaf': 7, 'min_samples_split': 18},
+    'sls-mcs': {'criterion': 'mse', 'max_depth': 10, 'min_samples_leaf': 5, 'min_samples_split': 6},
+    'sls-mcs-lsu': {'criterion': 'friedman_mse', 'max_depth': 15, 'min_samples_leaf': 1, 'min_samples_split': 6},
+    'Open-WBO-g': {'criterion': 'mae', 'max_depth': 5, 'min_samples_leaf': 1, 'min_samples_split': 10},
+    'Open-WBO-ms': {'criterion': 'friedman_mse', 'max_depth': 10, 'min_samples_leaf': 5, 'min_samples_split': 12},
+}
 
 def readCSV(fname):
     index = [i for i in range(0, n_instance)]
@@ -123,9 +145,9 @@ for i in range(n_iteration):
     solvers.remove('instance')
 
     all_reg = {}
+    all_param = {}
     inputInstance = feature.iloc[train_ind, :]
     scaler = StandardScaler()
-    inputInstance = pd.DataFrame(scaler.fit_transform(inputInstance), columns=inputInstance.columns)
     all_scaler = scaler
 
 
@@ -133,11 +155,13 @@ for i in range(n_iteration):
         target = all_scores.loc[train_ind, s]
 
 
-        reg = DecisionTreeRegressor()
-        # clf = GridSearchCV(reg, parameter_space_grid['RandomForestRegressor'], cv=skf.split(inputInstance, problem_train_label))
-        # clf.fit(inputInstance.loc[:, all_solver_features[s]], target)
+        reg = DecisionTreeRegressor(**best_param[s])
+        #clf = GridSearchCV(reg, parameter_space_grid['DecisionTreeRegressor'], refit=True)
+        #clf.fit(inputInstance, target)
+        #all_param[s] = clf.best_params_
+        #print(clf.best_params_)
         reg.fit(inputInstance, target)
-        # print("{}: {}".format(s, reg.score(inputInstance.loc[:, all_solver_features[s]], target)))
+        #print("{}: {}".format(s, reg.score(inputInstance, target)))
         all_reg[s] = reg
 
 
@@ -145,7 +169,7 @@ for i in range(n_iteration):
     test_all_scores = all_scores.iloc[test_ind, 1:]
     test_result = np.array([[] for i in range(len(test_instance))])
     for s in solvers:
-        processed_test_instance = pd.DataFrame(preprocessing(test_instance, all_scaler), columns=test_instance.columns)
+        processed_test_instance = pd.DataFrame(test_instance, columns=test_instance.columns)
         cur_result = all_reg[s].predict(processed_test_instance)
         cur_result = cur_result.reshape(len(cur_result), 1)
         test_result = np.hstack((test_result, cur_result))
@@ -155,7 +179,7 @@ for i in range(n_iteration):
     print("Single Best Solver: ", singleBestSolver(test_all_scores))
 
     print(oracleAveScore(best_score.iloc[test_ind, 1:]))
-
+print(end)
 # print("Error per instance: ", resultAnalysis(test_result, best_score.iloc[test_ind], test_all_scores))
 
 
