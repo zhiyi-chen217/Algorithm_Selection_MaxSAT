@@ -48,12 +48,14 @@ void deleteTree (Node* root) {
     return;
 }
 
-vector<tuple<int, float>> readPred(string filename) {
+vector<tuple<int, float>> readPred(string filename, int n_pred) {
     vector<tuple<int, float>> result;
     fstream fin;
     fin.open(filename, ios::in);
     string row;
-    while (getline(fin, row)) {
+    getline(fin, row);
+    for (int i = 0; i < n_pred; i++) {
+        getline(fin, row);
         stringstream row_stream(row);
         string f, t;
         getline(row_stream, f, ',');
@@ -62,6 +64,23 @@ vector<tuple<int, float>> readPred(string filename) {
     }
     fin.close();
     return result;
+}
+void writeCSV(vector<vector<float>> data, string fname, vector<string> col_name) {
+    ofstream write(fname);
+    int n_col = col_name.size();
+    int n_row = data.size();
+    for (int i = 0; i < n_col; i++) {
+        write << col_name[i] << ",";
+    }
+    write << endl;
+    for (int i = 0; i < n_row; i++) {
+        vector<float>& cur_row = data[i];
+        for (int j = 0; j < n_col; j++) {
+            write << cur_row[j] << ",";
+        }
+        write << endl;
+    }
+    write.close();
 }
 
 vector<vector<float>> readCSV(fstream* fin, int n_instance, int n_feature) {
@@ -112,4 +131,13 @@ map<int, string> createMap(string l) {
         key++;
     }
     return result;
+}
+
+float meanVector(vector<float> data) {
+    int n_el = data.size();
+    float sum = 0;
+    for (int i = 0; i < n_el; i++) {
+        sum += data[i];
+    }
+    return sum / n_el;
 }

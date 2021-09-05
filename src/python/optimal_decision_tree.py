@@ -1,3 +1,4 @@
+import os
 import random
 
 import numpy as np
@@ -7,6 +8,7 @@ from sklearn.tree import DecisionTreeRegressor
 
 from MurTree import PredicateNode, ClassificationNode, MurTree
 
+os.chdir("../../data")
 
 def readCSV(fname, n_instance):
     index = [i for i in range(0, n_instance)]
@@ -159,30 +161,41 @@ def findOptimalTree(data, result, depth):
 
 def createLambda(limit):
     return lambda x: x > limit
-def constructPredicates(max_pred):
-    for c in classes[0:3]:
-        target = results_solvers.iloc[train_ind, :][c]
 
+
+def constructPredicates(max_pred):
+    feature_col_map = {feature.columns[i]: i for i in range(feature.columns.size)}
+    predicates = []
+    for c in classes:
+        target = results_solvers.iloc[train_ind, :][c]
         reg = DecisionTreeRegressor()
         reg.fit(feature.iloc[train_ind, :], target)
-        predicates = []
-        features = list(feature.columns)
-        f = open("../c++/predicate.csv", "w")
         for t in list(zip(reg.tree_.feature, reg.tree_.threshold)):
             if t[0] >= 0:
-                f.write("{},{}\n".format(t[0], t[1]))
-                predicates.append((features[t[0]], createLambda(t[1]), t[1]))
-    # random.shuffle(predicates)
-    f.close()
+                predicates.append([t[0], t[1]])
+
+    for c in classes[2:2]:
+        target = results_solvers.iloc[train_ind, :][c]
+        reg = DecisionTreeRegressor()
+        reg.fit(feature_reduction.iloc[train_ind, :], target)
+        features_reducted = list(feature_reduction.columns)
+        for t in list(zip(reg.tree_.feature, reg.tree_.threshold)):
+            if t[0] >= 0:
+                predicates.append([feature_col_map[features_reducted[t[0]]], t[1]])
+    random.shuffle(predicates)
+    pred_df = pd.DataFrame(predicates[:max_pred], columns=['feature', 'threshold'])
+    pred_df = pred_df.set_index('feature')
+    pred_df.to_csv("../src/c++/predicate.csv")
     return predicates
     # return predicates[:min(max_pred, len(predicates))]
 
 n_node = 50
 max_depth = 10
 n_instance = 297
-feature = readCSV("../../data/feature_extended_unweighted.csv", n_instance)
-best_score = readCSV("../../data/per_instance_best_score_unweighted.csv", n_instance)
-results_solvers = readCSV("../../data/result_unweighted.csv", n_instance)
+feature = readCSV("feature_unweighted_shuffled.csv", n_instance)
+feature_reduction = readCSV("feature_reduction_unweighted.csv", n_instance)
+best_score = readCSV("per_instance_best_score_unweighted_shuffled.csv", n_instance)
+results_solvers = readCSV("result_unweighted_shuffled.csv", n_instance)
 classes = list(results_solvers.columns)
 
 rs = ShuffleSplit(n_splits=1, test_size=0.25)
@@ -190,9 +203,9 @@ rs = ShuffleSplit(n_splits=1, test_size=0.25)
 for tr, te in rs.split(feature):
     train_ind = tr
     test_ind = te
-predicates = constructPredicates(100)
+predicates = constructPredicates(300)
 
-root, train_gain = findOptimalTree(feature.iloc[:, :], results_solvers.iloc[:, :], depth=3)
+# root, train_gain = findOptimalTree(feature.iloc[:, :], results_solvers.iloc[:, :], depth=3)
 #
 # tree = MurTree(root)
 # result = []

@@ -135,6 +135,9 @@ feature = feature.iloc[:, 1:]
 best_score = readCSV(best_score_file_name)
 
 test_size = int(n_instance / n_iteration)
+evaluate_result = np.array([0, 0, 0, 0])
+all_iter_importance = []
+n_feature = feature.columns.size
 for i in range(n_iteration):
     start = test_size * i
     end = test_size * (i + 1)
@@ -150,7 +153,7 @@ for i in range(n_iteration):
     scaler = StandardScaler()
     all_scaler = scaler
 
-
+    cur_iter_importance = np.zeros(n_feature)
     for s in solvers:
         target = all_scores.loc[train_ind, s]
 
@@ -161,9 +164,10 @@ for i in range(n_iteration):
         #all_param[s] = clf.best_params_
         #print(clf.best_params_)
         reg.fit(inputInstance, target)
+        cur_iter_importance += reg.feature_importances_
         #print("{}: {}".format(s, reg.score(inputInstance, target)))
         all_reg[s] = reg
-
+    all_iter_importance.append(cur_iter_importance)
 
     test_instance = feature.iloc[test_ind, :]
     test_all_scores = all_scores.iloc[test_ind, 1:]
@@ -173,17 +177,34 @@ for i in range(n_iteration):
         cur_result = all_reg[s].predict(processed_test_instance)
         cur_result = cur_result.reshape(len(cur_result), 1)
         test_result = np.hstack((test_result, cur_result))
+    ave_score = averageScore(test_result, test_all_scores)
+    SBS_score = singleBestSolver(test_all_scores)
+    oracle_score = oracleAveScore(best_score.iloc[test_ind, 1])
+    gap_covered = (ave_score - SBS_score)/(oracle_score - SBS_score)
+    print("Average score of the prediction: ", ave_score)
 
-    print("Average score of the prediction: ", averageScore(test_result, test_all_scores))
+    print("Single Best Solver: ", SBS_score)
 
-    print("Single Best Solver: ", singleBestSolver(test_all_scores))
+    print("Oracle score: ", oracle_score)
 
-    print(oracleAveScore(best_score.iloc[test_ind, 1:]))
+    print("Gap covered: ", gap_covered)
+
+    evaluate_result = np.vstack((evaluate_result, np.array([ave_score, SBS_score, oracle_score, gap_covered]).reshape(1, 4)))
+    print("-----------------------------------------------------------------------------------------------------------")
 print(end)
-# print("Error per instance: ", resultAnalysis(test_result, best_score.iloc[test_ind], test_all_scores))
+evaluate_pd = pd.DataFrame(evaluate_result[1:])
+evaluate_pd.columns = ["Prediction Score", "SBS Score", "Oracle Score", "Gap Covered%"]
+evaluate_pd = evaluate_pd.append(evaluate_pd.mean(axis=0), ignore_index=True)
+print(evaluate_pd)
 
+selected = all_iter_importance[0] > 1e-3
+for importance in all_iter_importance:
+    selected = selected & (importance > 1e-3)
+selected = [True] + list(selected)
 
-
+feature = readCSV(feature_file_name)
+feature = feature.loc[:, selected]
+feature.to_csv("feature_reduction_unweighted.csv")
 
 
 

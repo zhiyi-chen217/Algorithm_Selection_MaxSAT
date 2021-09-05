@@ -237,9 +237,6 @@ int main() {
     map <int, string> class_map = createMap(temp);
     vector<vector<float>> results_solvers = readCSV(&fin, N_INSTANCE, N_CLASS);
 
-    // read predicates
-    vector<tuple<int, float>> predicates = readPred(PRED_FILE_NAME);
-
     // split train test
     int test_size = (int)(N_INSTANCE / N_ITER);
     int train_size = N_INSTANCE - test_size;
@@ -249,27 +246,50 @@ int main() {
     vector<vector<float>> train_result(train_size, vector<float>(N_CLASS));
     vector<vector<float>> test_result(test_size, vector<float>(N_CLASS));
 
-    // N-fold validation
-    for (int i = 0; i < N_ITER; i++) {
-        int start = i * test_size;
-        int end = (i + 1) * test_size;
+    int n_pred = N_PRED_START;
+    for (; n_pred < N_PRED_END; n_pred += INTERVAL) {
 
-        // split data for current iteration
-        splitData(features, train_feature, test_feature, start, end);
-        splitData(results_solvers, train_result, test_result, start, end);
+        // read predicates
+        vector<tuple<int, float>> predicates = readPred(PRED_FILE_NAME, n_pred);
 
-        PNode* root = new PNode(1, 2);
-        float result = findOptimalTree(root, features, results_solvers, predicates, 2);
+        vector<vector<float>> evaluate_result(N_ITER, vector<float>(5));
+        enum Evaluate_col{Iteration, Gain, SBS_Gain, Oracle, Gap_Covered};
+        vector<string> result_col{"Iteration", "Prediction Score", "SBS Score", "Oracle Score", "Gap Covered%"};
 
-        MurTree tree(root);
-        float gain = computeGain(tree, test_feature, test_result);
-        float oracle = computeOracleGain(test_result);
-        float SBS_gain = computeSBSGain(test_result);
+        // N-fold validation
+        for (int i = 0; i < N_ITER; i++) {
+            int start = i * test_size;
+            int end = (i + 1) * test_size;
 
-        cout << "Average score of the prediction: " << gain << endl;
-        cout << "Score of the single best solver: " << SBS_gain << endl;
-        cout << "Score of the oracle: " << oracle << endl;
+            // split data for current iteration
+            splitData(features, train_feature, test_feature, start, end);
+            splitData(results_solvers, train_result, test_result, start, end);
 
-        deleteTree(root);
+            PNode* root = new PNode(1, 2);
+            float result = findOptimalTree(root, features, results_solvers, predicates, 2);
+
+            MurTree tree(root);
+            float gain = computeGain(tree, test_feature, test_result);
+            float SBS_gain = computeSBSGain(test_result);
+            float oracle = computeOracleGain(test_result);
+            float gap_covered = (gain - SBS_gain) / (oracle - SBS_gain);
+            evaluate_result[i][Iteration] = i + 1;
+            evaluate_result[i][Gain] = gain;
+            evaluate_result[i][SBS_Gain] = SBS_gain;
+            evaluate_result[i][Oracle] = oracle;
+            evaluate_result[i][Gap_Covered] = gap_covered;
+
+            cout << "Average score of the prediction: " << gain << endl;
+            cout << "Score of the single best solver: " << SBS_gain << endl;
+            cout << "Score of the oracle: " << oracle << endl;
+            cout << "Gap Covered: " << gap_covered << endl;
+            cout << "-----------------------------------------------------------------------------------" << endl;
+            deleteTree(root);
+        }
+
+        cout << "****************************************************************************************" << endl;
+        cout << "** Average Gap Covered: " << sumCol(evaluate_result, Gap_Covered) / N_ITER << endl;
+        cout << "****************************************************************************************" << endl;
+        //writeCSV(evaluate_result, "../../results/evaluate_result_direct_4.csv", result_col);
     }
 }
