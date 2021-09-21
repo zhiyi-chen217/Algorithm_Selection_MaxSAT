@@ -13,9 +13,9 @@ using namespace std;
 #define PRED_FILE_NAME "predicate.csv"
 #define SBS_IND 0
 #define N_ITER 5
-#define N_PRED_START 100
-#define N_PRED_END 300
-#define INTERVAL 20
+#define N_PRED_START 20
+#define N_PRED_END 250
+#define INTERVAL 10
 #define DIR "../../data/"
 
 vector<vector<float>> computeSingleFQ(vector<vector<float>>& data, vector<vector<float>>& result, vector<tuple<int, float>>& predicate);

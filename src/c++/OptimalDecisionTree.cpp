@@ -247,6 +247,9 @@ int main() {
     vector<vector<float>> test_result(test_size, vector<float>(N_CLASS));
 
     int n_pred = N_PRED_START;
+    vector<int> feature_count(N_FEATURE, 0);
+    vector<float> total_gains;
+    vector<float> average_gap_covered;
     for (; n_pred < N_PRED_END; n_pred += INTERVAL) {
 
         // read predicates
@@ -255,7 +258,7 @@ int main() {
         vector<vector<float>> evaluate_result(N_ITER, vector<float>(5));
         enum Evaluate_col{Iteration, Gain, SBS_Gain, Oracle, Gap_Covered};
         vector<string> result_col{"Iteration", "Prediction Score", "SBS Score", "Oracle Score", "Gap Covered%"};
-
+        double total_gain = 0.0;
         // N-fold validation
         for (int i = 0; i < N_ITER; i++) {
             int start = i * test_size;
@@ -266,7 +269,7 @@ int main() {
             splitData(results_solvers, train_result, test_result, start, end);
 
             PNode* root = new PNode(1, 2);
-            float result = findOptimalTree(root, features, results_solvers, predicates, 2);
+            total_gain += findOptimalTree(root, train_feature, train_result, predicates, 3) / train_size;
 
             MurTree tree(root);
             float gain = computeGain(tree, test_feature, test_result);
@@ -279,17 +282,25 @@ int main() {
             evaluate_result[i][Oracle] = oracle;
             evaluate_result[i][Gap_Covered] = gap_covered;
 
-            cout << "Average score of the prediction: " << gain << endl;
-            cout << "Score of the single best solver: " << SBS_gain << endl;
-            cout << "Score of the oracle: " << oracle << endl;
-            cout << "Gap Covered: " << gap_covered << endl;
-            cout << "-----------------------------------------------------------------------------------" << endl;
+            // cout << "Average score of the prediction: " << gain << endl;
+            // cout << "Score of the single best solver: " << SBS_gain << endl;
+            // cout << "Score of the oracle: " << oracle << endl;
+            // cout << "Gap Covered: " << gap_covered << endl;
+            // cout << "-----------------------------------------------------------------------------------" << endl;
             deleteTree(root);
         }
-
+        total_gain /= N_ITER;
+        average_gap_covered.push_back(sumCol(evaluate_result, Gap_Covered) / N_ITER);
+        total_gains.push_back(total_gain);
         cout << "****************************************************************************************" << endl;
         cout << "** Average Gap Covered: " << sumCol(evaluate_result, Gap_Covered) / N_ITER << endl;
+        cout << "** Total gain: " << total_gain << endl;
         cout << "****************************************************************************************" << endl;
+
         //writeCSV(evaluate_result, "../../results/evaluate_result_direct_4.csv", result_col);
     }
+
+    printVector(total_gains);
+    printVector(average_gap_covered);
+    cout << "end" << endl;
 }

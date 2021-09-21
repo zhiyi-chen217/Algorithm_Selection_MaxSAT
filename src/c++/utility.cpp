@@ -9,7 +9,7 @@ int argmax(vector<float> data) {
     }
 
     int max_ind = 0;
-    int max = data[0];
+    float max = data[0];
     for (int i = 0; i < data.size(); i++) {
         if (data[i] > max) {
             max = data[i];
@@ -140,4 +140,12 @@ float meanVector(vector<float> data) {
         sum += data[i];
     }
     return sum / n_el;
+}
+
+void printVector(vector<float> data) {
+    int num = data.size();
+    for (int i = 0; i < num; i++) {
+        cout << data[i] << ", " << endl;
+    }
+    cout << "-------------------------------------------------------------------------------------" << endl;
 }

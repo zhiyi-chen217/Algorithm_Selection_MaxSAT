@@ -26,3 +26,5 @@ map<int, string> createMap(string l);
 void splitData(vector<vector<float>>& data, vector<vector<float>>& train, vector<vector<float>>& test, int start, int end);
 
 float meanVector(vector<float> data);
+
+void printVector(vector<float> data);

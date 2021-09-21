@@ -165,7 +165,9 @@ def createLambda(limit):
 
 def constructPredicates(max_pred):
     feature_col_map = {feature.columns[i]: i for i in range(feature.columns.size)}
+    features = list(feature.columns)
     predicates = []
+    predicates_return = []
     for c in classes:
         target = results_solvers.iloc[train_ind, :][c]
         reg = DecisionTreeRegressor()
@@ -173,8 +175,8 @@ def constructPredicates(max_pred):
         for t in list(zip(reg.tree_.feature, reg.tree_.threshold)):
             if t[0] >= 0:
                 predicates.append([t[0], t[1]])
-
-    for c in classes[2:2]:
+                predicates_return.append((features[t[0]], createLambda(t[1]), t[1]))
+    for c in classes[4:4]:
         target = results_solvers.iloc[train_ind, :][c]
         reg = DecisionTreeRegressor()
         reg.fit(feature_reduction.iloc[train_ind, :], target)
@@ -182,11 +184,11 @@ def constructPredicates(max_pred):
         for t in list(zip(reg.tree_.feature, reg.tree_.threshold)):
             if t[0] >= 0:
                 predicates.append([feature_col_map[features_reducted[t[0]]], t[1]])
-    random.shuffle(predicates)
+    #random.shuffle(predicates)
     pred_df = pd.DataFrame(predicates[:max_pred], columns=['feature', 'threshold'])
     pred_df = pred_df.set_index('feature')
     pred_df.to_csv("../src/c++/predicate.csv")
-    return predicates
+    return predicates_return[:max_pred]
     # return predicates[:min(max_pred, len(predicates))]
 
 n_node = 50
@@ -203,9 +205,31 @@ rs = ShuffleSplit(n_splits=1, test_size=0.25)
 for tr, te in rs.split(feature):
     train_ind = tr
     test_ind = te
-predicates = constructPredicates(300)
 
-# root, train_gain = findOptimalTree(feature.iloc[:, :], results_solvers.iloc[:, :], depth=3)
+# test_size = int(n_instance / 5)
+# i = 0
+# start = test_size * i
+# end = test_size * (i + 1)
+# train_ind = [j for j in range(0, start)] + [j for j in range(end, n_instance)]
+# test_ind = [j for j in range(start, end)]
+
+#predicates = constructPredicates(500)
+
+predicates = []
+for i in range(feature.columns.size):
+    mu = feature.iloc[:, i].mean()
+    std = feature.iloc[:, i].std()
+    if std > 0:
+        t = np.quantile(feature.iloc[:, i], [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95])
+        for temp in t:
+            predicates.append([i, temp])
+random.shuffle(predicates)
+pred_df = pd.DataFrame(predicates[:], columns=['feature', 'threshold'])
+pred_df = pred_df.set_index('feature')
+pred_df.to_csv("../src/c++/predicate.csv")
+
+
+# root, train_gain = findOptimalTree(feature.iloc[train_ind, :], results_solvers.iloc[train_ind, :], depth=2)
 #
 # tree = MurTree(root)
 # result = []
