@@ -1,99 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
-gain = np.array([0.932149,
-0.932251,
-0.932251,
-0.932682,
-0.934105,
-0.934105,
-0.934105,
-0.934408,
-0.93494,
-0.93494,
-0.935154,
-0.935154,
-0.935277,
-0.935277,
-0.935277,
-0.935787,
-0.935812,
-0.935812,
-0.935812,
-0.935812,
-0.936095,
-0.936333,
-0.936333,
-0.936698,
-0.936698,
-0.936698,
-0.936805,
-0.937505,
-0.937505,
-0.937761,
-0.937761,
-0.937761,
-0.937761,
-0.937761,
-0.937866,
-0.937866,
-0.937971,
-0.937971,
-0.937971,
-0.937971,
-0.937971,
-0.937971,
-0.937971,
-0.937971,
-0.937971, ])
+import pandas as pd
+import os
+os.chdir("../../result")
+results = pd.read_csv("result_reduction.csv")
+start = 4
+end = 760
+step = 3
+predicates = [i for i in range(start, end, step)]
 
-gap_covered = \
-        np.array([0.290977,
-0.275362,
-0.275362,
-0.235689,
-0.35888,
-0.35888,
-0.35888,
-0.330023,
-0.38427,
-0.38427,
-0.272274,
-0.272274,
-0.327393,
-0.327393,
-0.327393,
-0.365139,
-0.365139,
-0.365139,
-0.365139,
-0.365139,
-0.364987,
-0.430749,
-0.430749,
-0.404409,
-0.404409,
-0.404409,
-0.34744,
-0.22715,
-0.22715,
-0.226492,
-0.226492,
-0.226492,
-0.226492,
-0.226492,
-0.219427,
-0.219427,
-0.218576,
-0.218576,
-0.218576,
-0.218576,
-0.218576,
-0.218576,
-0.218576,
-0.218576,
-0.218576, ])
-
-predicates = [i for i in range(50, 500, 10)]
+gain = np.array(results.loc[:, "Gain"])
+gap_covered = np.array(results.loc[:, "Average Gap Covered"])
 gain = (gain - np.mean(gain)) / np.std(gain)
 gap_covered = (gap_covered - np.mean(gap_covered)) / np.std(gap_covered)
 
@@ -102,7 +19,7 @@ ax.plot(predicates, gain, label='training')  # Plot some data on the axes.
 ax.plot(predicates, gap_covered, label='testing')
 ax.set_xlabel("#predicate")
 ax.set_ylabel("standardized performance")
-ax.set_title("Training and Testing performance of decision tree with depth 2")
+# ax.set_title("Training and Testing performance of decision tree with depth 2")
 plt.legend()
-plt.savefig("../../result/train_test_curve.png")
+plt.savefig("train_test_curve_reduction.png")
 plt.show()

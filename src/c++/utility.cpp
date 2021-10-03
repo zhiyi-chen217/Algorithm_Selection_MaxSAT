@@ -149,3 +149,15 @@ void printVector(vector<float> data) {
     }
     cout << "-------------------------------------------------------------------------------------" << endl;
 }
+
+vector<vector<float>> VStackTwoVector(vector<float> col1, vector<float> col2) {
+    int col_size = col1.size();
+    vector<vector<float>> results(col_size, vector<float>(2));
+    for (int j = 0; j < col_size; j++) {
+        results[j][0] = col1[j]; 
+    }
+    for (int j = 0; j < col_size; j++) {
+        results[j][1] = col2[j];
+    }
+    return results;
+}

@@ -196,6 +196,7 @@ max_depth = 10
 n_instance = 297
 feature = readCSV("feature_unweighted_shuffled.csv", n_instance)
 feature_reduction = readCSV("feature_reduction_unweighted.csv", n_instance)
+feature_reduction_lasso = readCSV("feature_reduction_lasso_unweighted.csv", n_instance)
 best_score = readCSV("per_instance_best_score_unweighted_shuffled.csv", n_instance)
 results_solvers = readCSV("result_unweighted_shuffled.csv", n_instance)
 classes = list(results_solvers.columns)
@@ -216,17 +217,17 @@ for tr, te in rs.split(feature):
 #predicates = constructPredicates(500)
 
 predicates = []
-for i in range(feature.columns.size):
-    mu = feature.iloc[:, i].mean()
-    std = feature.iloc[:, i].std()
+for i in range(feature_reduction.columns.size):
+    mu = feature_reduction.iloc[:, i].mean()
+    std = feature_reduction.iloc[:, i].std()
     if std > 0:
-        t = np.quantile(feature.iloc[:, i], [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95])
+        t = np.quantile(feature_reduction.iloc[:, i], np.linspace(0, 1, 20))
         for temp in t:
             predicates.append([i, temp])
 random.shuffle(predicates)
 pred_df = pd.DataFrame(predicates[:], columns=['feature', 'threshold'])
 pred_df = pred_df.set_index('feature')
-pred_df.to_csv("../src/c++/predicate.csv")
+pred_df.to_csv("../src/c++/predicate_reduction.csv")
 
 
 # root, train_gain = findOptimalTree(feature.iloc[train_ind, :], results_solvers.iloc[train_ind, :], depth=2)

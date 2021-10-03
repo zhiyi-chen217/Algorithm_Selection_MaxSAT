@@ -197,14 +197,14 @@ evaluate_pd.columns = ["Prediction Score", "SBS Score", "Oracle Score", "Gap Cov
 evaluate_pd = evaluate_pd.append(evaluate_pd.mean(axis=0), ignore_index=True)
 print(evaluate_pd)
 
-selected = all_iter_importance[0] > 1e-3
+selected = all_iter_importance[0] > 5e-3
 for importance in all_iter_importance:
-    selected = selected & (importance > 1e-3)
+    selected = selected | (importance > 5e-3)
 selected = [True] + list(selected)
 
 feature = readCSV(feature_file_name)
 feature = feature.loc[:, selected]
-feature.to_csv("feature_reduction_unweighted.csv")
+feature.to_csv("feature_reduction_unweighted.csv", index=False)
 
 
 

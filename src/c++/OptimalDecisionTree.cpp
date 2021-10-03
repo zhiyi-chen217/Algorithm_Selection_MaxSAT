@@ -269,7 +269,7 @@ int main() {
             splitData(results_solvers, train_result, test_result, start, end);
 
             PNode* root = new PNode(1, 2);
-            total_gain += findOptimalTree(root, train_feature, train_result, predicates, 3) / train_size;
+            total_gain += findOptimalTree(root, train_feature, train_result, predicates, 2) / train_size;
 
             MurTree tree(root);
             float gain = computeGain(tree, test_feature, test_result);
@@ -293,6 +293,7 @@ int main() {
         average_gap_covered.push_back(sumCol(evaluate_result, Gap_Covered) / N_ITER);
         total_gains.push_back(total_gain);
         cout << "****************************************************************************************" << endl;
+        cout << "**" << n_pred << endl;
         cout << "** Average Gap Covered: " << sumCol(evaluate_result, Gap_Covered) / N_ITER << endl;
         cout << "** Total gain: " << total_gain << endl;
         cout << "****************************************************************************************" << endl;
@@ -302,5 +303,8 @@ int main() {
 
     printVector(total_gains);
     printVector(average_gap_covered);
+
+    vector<vector<float>> all_results = VStackTwoVector(total_gains, average_gap_covered);
+    writeCSV(all_results, "../../result/result_reduction_lasso.csv", {"Gain", "Average Gap Covered"});
     cout << "end" << endl;
 }

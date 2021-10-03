@@ -15,7 +15,16 @@ from sklearn.ensemble import RandomForestRegressor
 from itertools import chain, combinations
 import os
 import math
-os.chdir("../data")
+os.chdir("../../data")
+
+def readCSV(fname, n_instance):
+    index = [i for i in range(0, n_instance)]
+    df = pd.read_csv(fname)
+    df = df.sort_values(by=['instance'])
+    df = df.set_index('instance')
+    df = df.fillna(0)
+    return df
+
 def expandFeature(feature, n):
     new_feature = feature.copy()
     col = new_feature.columns
@@ -34,7 +43,6 @@ def expandFeature(feature, n):
 
 def selectFeature(feature, all_scores, expand_n):
     solvers = list(all_scores.columns)
-    solvers.remove('instance')
     lambda1 = 0.0001
     input_instance = feature.iloc[:, 1:]
     input_instance["bias"] = np.ones(len(input_instance))
@@ -89,6 +97,24 @@ def selectFeature(feature, all_scores, expand_n):
         
         all_solver_features[s] = S_final
     return all_solver_features
-    
 
+n_instance = 297
 
+feature = readCSV("feature_unweighted_shuffled.csv", n_instance)
+best_score = readCSV("per_instance_best_score_unweighted_shuffled.csv", n_instance)
+results_solvers = readCSV("result_unweighted_shuffled.csv", n_instance)
+
+result_feature = selectFeature(feature, results_solvers, 1)
+features = feature.columns
+selected_features = ["instance"]
+for f in features:
+    select = True
+    for r in result_feature:
+        select = select & (f in result_feature[r])
+    if select:
+        selected_features.append(f)
+print(selected_features)
+reduced_feature = pd.read_csv("feature_unweighted_shuffled.csv")
+reduced_feature = reduced_feature.loc[:, selected_features]
+reduced_feature.to_csv("feature_reduction_lasso_unweighted.csv", index=False)
+print("end")

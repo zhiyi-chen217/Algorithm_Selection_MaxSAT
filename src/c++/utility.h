@@ -28,3 +28,5 @@ void splitData(vector<vector<float>>& data, vector<vector<float>>& train, vector
 float meanVector(vector<float> data);
 
 void printVector(vector<float> data);
+
+vector<vector<float>> VStackTwoVector(vector<float> col1, vector<float> col2);
