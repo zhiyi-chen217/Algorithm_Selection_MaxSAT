@@ -217,17 +217,17 @@ for tr, te in rs.split(feature):
 #predicates = constructPredicates(500)
 
 predicates = []
-for i in range(feature_reduction.columns.size):
-    mu = feature_reduction.iloc[:, i].mean()
-    std = feature_reduction.iloc[:, i].std()
+for i in range(feature.columns.size):
+    mu = feature.iloc[:, i].mean()
+    std = feature.iloc[:, i].std()
     if std > 0:
-        t = np.quantile(feature_reduction.iloc[:, i], np.linspace(0, 1, 20))
+        t = np.quantile(feature.iloc[:, i], np.linspace(0, 1, 20))
         for temp in t:
             predicates.append([i, temp])
 random.shuffle(predicates)
 pred_df = pd.DataFrame(predicates[:], columns=['feature', 'threshold'])
 pred_df = pred_df.set_index('feature')
-pred_df.to_csv("../src/c++/predicate_reduction.csv")
+pred_df.to_csv("../src/c++/predicate.csv")
 
 
 # root, train_gain = findOptimalTree(feature.iloc[train_ind, :], results_solvers.iloc[train_ind, :], depth=2)

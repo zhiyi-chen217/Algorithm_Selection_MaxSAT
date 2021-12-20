@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
+
 os.chdir("../../result")
-results = pd.read_csv("result_reduction.csv")
+results = pd.read_csv("result_reduction_2.csv")
 start = 4
-end = 760
+end = 500
 step = 3
 predicates = [i for i in range(start, end, step)]
 
