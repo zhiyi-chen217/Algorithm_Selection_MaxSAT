@@ -184,7 +184,7 @@ def constructPredicates(max_pred):
         for t in list(zip(reg.tree_.feature, reg.tree_.threshold)):
             if t[0] >= 0:
                 predicates.append([feature_col_map[features_reducted[t[0]]], t[1]])
-    #random.shuffle(predicates)
+    random.shuffle(predicates)
     pred_df = pd.DataFrame(predicates[:max_pred], columns=['feature', 'threshold'])
     pred_df = pred_df.set_index('feature')
     pred_df.to_csv("../src/c++/predicate.csv")

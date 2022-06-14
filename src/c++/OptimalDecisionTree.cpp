@@ -1,35 +1,35 @@
 #include "MurTree.h"
 #include "Frequency.h"
-
+                                                                                                                                                                                  
 using namespace std;
-float computeGain(MurTree& tree, vector<vector<float>> data, vector<vector<float>> result) {
+float computeGain(MurTree& tree, vector<vector<float>> data, vector<vector<float>> score) {
     // mata data
     int n_instance = data.size();
     float gain = 0;
     for (int i = 0; i < n_instance; i++) {
         int label = tree.classify(data[i]);
-        gain += result[i][label];
+        gain += score[i][label];
     }
-    gain = gain / n_instance;
+    // gain = gain / n_instance;
 
     return gain;
 }
 
-float computeOracleGain(vector<vector<float>> result) {
-    int n_instance = result.size();
+float computeOracleGain(vector<vector<float>> score) {
+    int n_instance = score.size();
     float gain = 0;
     for (int i = 0; i < n_instance; i++) {
-        int max_ind = argmax(result[i]);
-        gain += result[i][max_ind];
+        int max_ind = argmax(score[i]);
+        gain += score[i][max_ind];
     }
     return gain / n_instance;
 }
 
-float computeSBSGain(vector<vector<float>> result) {
-    int n_instance = result.size();
+float computeSBSGain(vector<vector<float>> score) {
+    int n_instance = score.size();
     float gain = 0;
     for (int i = 0; i < n_instance; i++) {
-        gain += result[i][SBS_IND];
+        gain += score[i][SBS_IND];
     }
     return gain / n_instance;
 }
@@ -225,26 +225,46 @@ int main() {
     fstream fin;
     string temp;
     cout << "start" << endl;
-    // read feature data 
-    fin.open(string(DIR) + string(FEATURE_FILE_NAME), ios::in);
-    getline(fin, temp);
-    map <int, string> feature_map = createMap(temp);
-    vector<vector<float>> features = readCSV(&fin, N_INSTANCE, N_FEATURE);
 
-    // read result data
-    fin.open(string(DIR) + string(RESULT_FILE_NAME), ios::in);
+    // read train result data
+    fin.open(string(DIR) + string(TRAIN_RESULT_FILE_NAME), ios::in);
     getline(fin, temp);
     map <int, string> class_map = createMap(temp);
-    vector<vector<float>> results_solvers = readCSV(&fin, N_INSTANCE, N_CLASS);
+    vector<vector<float>> train_result = readCSV(&fin, N_INSTANCE, N_CLASS);
+
+    // read train feature data 
+    fin.open(string(DIR) + string(TRAIN_FEATURE_FILE_NAME), ios::in);
+    getline(fin, temp);
+    map <int, string> feature_map = createMap(temp);
+    vector<vector<float>> train_feature = readCSV(&fin, N_INSTANCE, N_FEATURE);
+
+    // read test feature data 
+    fin.open(string(DIR) + string(TEST_FEATURE_FILE_NAME), ios::in);
+    getline(fin, temp);
+    vector<vector<float>> test_feature = readCSV(&fin, N_TEST, N_FEATURE);
+
+    // read test result data
+    fin.open(string(DIR) + string(TEST_RESULT_FILE_NAME), ios::in);
+    getline(fin, temp);
+    vector<vector<float>> test_result = readCSV(&fin, N_TEST, N_CLASS);
+
+    // read test score data
+    fin.open(string(DIR) + string(TEST_SCORE_FILE_NAME), ios::in);
+    getline(fin, temp);
+
+    vector<vector<float>> test_score = readCSV(&fin, N_TEST, N_CLASS);
 
     // split train test
-    int test_size = (int)(N_INSTANCE / N_ITER);
-    int train_size = N_INSTANCE - test_size;
-    vector<vector<float>> train_feature(train_size, vector<float>(N_FEATURE));
-    vector<vector<float>> test_feature(test_size, vector<float>(N_FEATURE));
+    int train_size = N_INSTANCE;
+    int test_size = N_TEST;
+    // vector<vector<float>> train_feature(train_size, vector<float>(N_FEATURE));
+    // vector<vector<float>> test_feature(test_size, vector<float>(N_FEATURE));
     
-    vector<vector<float>> train_result(train_size, vector<float>(N_CLASS));
-    vector<vector<float>> test_result(test_size, vector<float>(N_CLASS));
+    // vector<vector<float>> train_result(train_size, vector<float>(N_CLASS));
+    // vector<vector<float>> test_result(test_size, vector<float>(N_CLASS));
+
+    // vector<vector<float>> train_score(train_size, vector<float>(N_CLASS));
+    // vector<vector<float>> test_score(test_size, vector<float>(N_CLASS));
 
     int n_pred = N_PRED_START;
     vector<int> feature_count(N_FEATURE, 0);
@@ -261,26 +281,27 @@ int main() {
         double total_gain = 0.0;
         // N-fold validation
         for (int i = 0; i < N_ITER; i++) {
-            int start = i * test_size;
-            int end = (i + 1) * test_size;
+            // int start = i * test_size;
+            // int end = (i + 1) * test_size;
 
             // split data for current iteration
-            splitData(features, train_feature, test_feature, start, end);
-            splitData(results_solvers, train_result, test_result, start, end);
+            // splitData(features, train_feature, test_feature, start, end);
+            // splitData(results_solvers, train_result, test_result, start, end);
+            // splitData(scores_solvers, train_score, test_score, start, end);
 
             PNode* root = new PNode(1, 2);
-            total_gain += findOptimalTree(root, train_feature, train_result, predicates, 3) / train_size;
+            total_gain += findOptimalTree(root, train_feature, train_result, predicates, 3);
 
             MurTree tree(root);
-            float gain = computeGain(tree, test_feature, test_result);
-            float SBS_gain = computeSBSGain(test_result);
-            float oracle = computeOracleGain(test_result);
-            float gap_covered = (gain - SBS_gain) / (oracle - SBS_gain);
+            float gain = computeGain(tree, test_feature, test_score);
+            // float SBS_gain = computeSBSGain(test_score);
+            // float oracle = computeOracleGain(test_score);
+            // float gap_covered = (gain - SBS_gain) / (oracle - SBS_gain);
             evaluate_result[i][Iteration] = i + 1;
             evaluate_result[i][Gain] = gain;
-            evaluate_result[i][SBS_Gain] = SBS_gain;
-            evaluate_result[i][Oracle] = oracle;
-            evaluate_result[i][Gap_Covered] = gap_covered;
+            // evaluate_result[i][SBS_Gain] = SBS_gain;
+            // evaluate_result[i][Oracle] = oracle;
+            // evaluate_result[i][Gap_Covered] = gap_covered;
 
             // cout << "Average score of the prediction: " << gain << endl;
             // cout << "Score of the single best solver: " << SBS_gain << endl;
@@ -289,12 +310,12 @@ int main() {
             // cout << "-----------------------------------------------------------------------------------" << endl;
             deleteTree(root);
         }
-        total_gain /= N_ITER;
-        average_gap_covered.push_back(sumCol(evaluate_result, Gap_Covered) / N_ITER);
-        total_gains.push_back(total_gain);
+        total_gain = sumCol(evaluate_result, Gain) / N_ITER;
+        // average_gap_covered.push_back(sumCol(evaluate_result, Gap_Covered) / N_ITER);
+        total_gains.push_back(sumCol(evaluate_result, Gain) / N_ITER);
         cout << "****************************************************************************************" << endl;
         cout << "**" << n_pred << endl;
-        cout << "** Average Gap Covered: " << sumCol(evaluate_result, Gap_Covered) / N_ITER << endl;
+        // cout << "** Average Gap Covered: " << sumCol(evaluate_result, Gap_Covered) / N_ITER << endl;
         cout << "** Total gain: " << total_gain << endl;
         cout << "****************************************************************************************" << endl;
 
