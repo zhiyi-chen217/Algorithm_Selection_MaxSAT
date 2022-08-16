@@ -15,6 +15,20 @@ float computeGain(MurTree& tree, vector<vector<float>> data, vector<vector<float
     return gain;
 }
 
+vector<string> predicted_class(MurTree& tree, vector<vector<float>> data, map<int, string> class_map) {
+    // mata data
+    int n_instance = data.size();    
+    vector<string> predicted(n_instance);
+    for (int i = 0; i < n_instance; i++) {
+        int label = tree.classify(data[i]);
+        predicted[i] = class_map[label];
+    }
+    // gain = gain / n_instance;
+
+    return predicted;
+}
+
+
 float computeOracleGain(vector<vector<float>> score) {
     int n_instance = score.size();
     float gain = 0;
@@ -294,6 +308,8 @@ int main() {
 
             MurTree tree(root);
             float gain = computeGain(tree, test_feature, test_score);
+            vector<string> predicted = predicted_class(tree, test_feature, class_map);
+            printVector(predicted);
             // float SBS_gain = computeSBSGain(test_score);
             // float oracle = computeOracleGain(test_score);
             // float gap_covered = (gain - SBS_gain) / (oracle - SBS_gain);
@@ -323,9 +339,7 @@ int main() {
     }
 
     printVector(total_gains);
-    printVector(average_gap_covered);
-
-    vector<vector<float>> all_results = VStackTwoVector(total_gains, average_gap_covered);
-    writeCSV(all_results, "../../result/result_3.csv", {"Gain", "Average Gap Covered"});
+    // printVector(average_gap_covered);
+    // vector<vector<float>> all_results = VStackTwoVector(total_gains, average_gap_covered);
     cout << "end" << endl;
 }

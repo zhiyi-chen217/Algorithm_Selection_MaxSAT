@@ -29,4 +29,6 @@ float meanVector(vector<float> data);
 
 void printVector(vector<float> data);
 
+void printVector(vector<string> data);
+
 vector<vector<float>> VStackTwoVector(vector<float> col1, vector<float> col2);

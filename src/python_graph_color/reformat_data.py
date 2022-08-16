@@ -8,7 +8,8 @@ test_culb_file_name = "test_culb_data.csv"
 test_dimacs_file_name = "test_dimacs_data.csv"
 feature_file_name = "dimacs_and_culberson_features.csv"
 algos = ["dsatur", "max_clique", "max_path", "max_degree", "min_width", "lex"]
-time_limit = 3600
+test_result_name = "predictive_experiments_test_dimacs.csv"
+time_limit = 1800
 
 def readCSV(fname, time_limit):
     df = pd.read_csv(fname)
@@ -32,6 +33,19 @@ def reformat_result(file_name, result_file_name):
                 df_save.loc[i, algo] = 0
     df_save = df_save.sort_index()
     df_save.to_csv(result_file_name, index_label="instance")
+
+def test_result(file_name, experiment):
+    df = readCSV(file_name, time_limit)
+    all_train_instance = list(set(df.loc[:, "instance"]))
+
+    cur_exp = df[df["experiment"].str.startswith(experiment)]
+    count = 0
+    for i in all_train_instance:
+        cur_exp_instance = cur_exp.loc[cur_exp["instance"] == i]
+        cur_exp_instance = cur_exp_instance.loc[cur_exp_instance["optimal"]]
+        if len(cur_exp_instance) > 0:
+            count += 1
+    return count
 
 def reformat_result_time(file_name, result_file_name):
     df = readCSV(file_name, time_limit)
@@ -73,6 +87,6 @@ def reformat_feature():
     test_dimacs_feature_df = test_dimacs_feature_df.sort_values(["instance"])
     test_dimacs_feature_df.to_csv("../test_dimacs_feature.csv", index=False)
 
-reformat_result_time(train_result_file_name, "../all_ordering_time_train_result.csv")
+count = test_result(test_result_name, "C4.5DT")
 # reformat_feature()
 print("end")

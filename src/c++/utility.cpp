@@ -123,6 +123,7 @@ void splitData(vector<vector<float>>& data, vector<vector<float>>& train, vector
 map<int, string> createMap(string l) {
     stringstream line_stream(l);
     string value;
+    getline(line_stream, value, ',');
     map<int, string> result;
     int key = 0;
     while (getline(line_stream, value, ','))
@@ -143,6 +144,14 @@ float meanVector(vector<float> data) {
 }
 
 void printVector(vector<float> data) {
+    int num = data.size();
+    for (int i = 0; i < num; i++) {
+        cout << data[i] << "" << endl;
+    }
+    cout << "-------------------------------------------------------------------------------------" << endl;
+}
+
+void printVector(vector<string> data) {
     int num = data.size();
     for (int i = 0; i < num; i++) {
         cout << data[i] << ", " << endl;

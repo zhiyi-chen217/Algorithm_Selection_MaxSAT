@@ -3,7 +3,7 @@
 src/__pycache__
 src/python/__pycache__
 venv
-
+.vscode
+Literature/
 # file types
 *.csv#
-

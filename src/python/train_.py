@@ -138,6 +138,7 @@ test_size = int(n_instance / n_iteration)
 evaluate_result = np.array([0, 0, 0, 0])
 all_iter_importance = []
 n_feature = feature.columns.size
+gaps_covered = []
 for i in range(n_iteration):
     start = test_size * i
     end = test_size * (i + 1)
@@ -181,6 +182,7 @@ for i in range(n_iteration):
     SBS_score = singleBestSolver(test_all_scores)
     oracle_score = oracleAveScore(best_score.iloc[test_ind, 1])
     gap_covered = (ave_score - SBS_score)/(oracle_score - SBS_score)
+    gaps_covered.append(gap_covered)
     print("Average score of the prediction: ", ave_score)
 
     print("Single Best Solver: ", SBS_score)
@@ -196,7 +198,8 @@ evaluate_pd = pd.DataFrame(evaluate_result[1:])
 evaluate_pd.columns = ["Prediction Score", "SBS Score", "Oracle Score", "Gap Covered%"]
 evaluate_pd = evaluate_pd.append(evaluate_pd.mean(axis=0), ignore_index=True)
 print(evaluate_pd)
-
+result_file = open("../result/result_max_sat_reg.csv", 'a')
+result_file.write(gaps_covered.__str__()[1:-1] + ", ")
 selected = all_iter_importance[0] > 5e-3
 for importance in all_iter_importance:
     selected = selected | (importance > 5e-3)

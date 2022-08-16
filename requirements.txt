@@ -1,5 +1,6 @@
-sklearn
-numpy
-pandas
-scipy
-matplotlib
+sklearn~=0.0
+numpy~=1.22.4
+pandas~=1.4.2
+scipy~=1.8.1
+matplotlib~=3.5.2
+scikit-learn~=1.1.1
